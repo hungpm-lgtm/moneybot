@@ -2,7 +2,10 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F5F7FA">
 <title>MoneyBot - Quản lý tài chính thông minh</title>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -38,37 +41,22 @@
 
 body {
   font-family: var(--font);
-  background: #1a1a2e;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background: var(--bg);
+  margin: 0;
+  padding: 0;
   min-height: 100vh;
-  padding: 20px;
+  overflow: hidden;
 }
 
 .phone-frame {
-  width: 390px;
-  height: 844px;
+  width: 100%;
+  height: 100dvh;
   background: var(--bg);
-  border-radius: 44px;
-  overflow: hidden;
-  box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
   position: relative;
   display: flex;
   flex-direction: column;
-}
-
-/* Status bar */
-.status-bar {
-  background: var(--white);
-  padding: 12px 24px 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: 'Space Mono', monospace;
-  flex-shrink: 0;
+  overflow: hidden;
+  padding-top: env(safe-area-inset-top);
 }
 
 /* Screens */
@@ -87,7 +75,7 @@ body {
   background: var(--white);
   border-top: 1px solid var(--gray-200);
   display: flex;
-  padding: 8px 0 16px;
+  padding: 8px 0 max(16px, env(safe-area-inset-bottom));
   flex-shrink: 0;
   box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
 }
@@ -103,7 +91,9 @@ body {
   transition: all 0.2s;
 }
 
-.nav-item .nav-icon { font-size: 20px; }
+.nav-item .nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+.nav-item .nav-icon svg { width: 22px; height: 22px; fill: var(--gray-400); transition: fill 0.2s; }
+.nav-item.active .nav-icon svg { fill: var(--teal); }
 .nav-item .nav-label { font-size: 11px; font-weight: 500; color: var(--gray-400); }
 .nav-item.active .nav-label { color: var(--teal); font-weight: 700; }
 
@@ -276,19 +266,19 @@ body {
 /* FAB */
 .fab {
   position: fixed;
-  bottom: 80px;
+  bottom: calc(76px + env(safe-area-inset-bottom));
   right: 20px;
-  width: 56px; height: 56px;
+  width: 52px; height: 52px;
   background: linear-gradient(135deg, var(--teal), var(--teal-dark));
-  border-radius: 50%;
+  border-radius: 16px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 28px; color: white;
-  box-shadow: 0 4px 20px rgba(0,191,165,0.4);
+  box-shadow: 0 4px 20px rgba(0,191,165,0.45);
   cursor: pointer;
   transition: transform 0.2s;
   z-index: 10;
 }
 .fab:active { transform: scale(0.92); }
+.fab svg { width: 26px; height: 26px; fill: white; }
 
 /* TRANSACTIONS SCREEN */
 .screen-header {
@@ -806,11 +796,6 @@ body {
 <body>
 
 <div class="phone-frame">
-  <!-- Status Bar -->
-  <div class="status-bar">
-    <span>9:07</span>
-    <span>📶 🔋</span>
-  </div>
 
   <!-- ===== HOME SCREEN ===== -->
   <div class="screen active" id="screen-home">
@@ -1105,29 +1090,35 @@ body {
   <!-- Bottom Nav -->
   <nav class="bottom-nav">
     <div class="nav-item active" id="nav-home" onclick="switchScreen('home')">
-      <div class="nav-icon">🏠</div>
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L2 12h3v9h6v-5h2v5h6v-9h3L12 3z"/></svg>
+      </div>
       <div class="nav-label">Trang chủ</div>
     </div>
     <div class="nav-item" id="nav-transactions" onclick="switchScreen('transactions')">
-      <div class="nav-icon">💳</div>
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+      </div>
       <div class="nav-label">Giao dịch</div>
     </div>
-    <div class="nav-item" id="nav-chat" onclick="switchScreen('chat')">
-      <div class="nav-icon">🤖</div>
-      <div class="nav-label">AI Chat</div>
-    </div>
     <div class="nav-item" id="nav-tools" onclick="switchScreen('tools')">
-      <div class="nav-icon">🪙</div>
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+      </div>
       <div class="nav-label">Công cụ</div>
     </div>
     <div class="nav-item" id="nav-settings" onclick="switchScreen('settings')">
-      <div class="nav-icon">⚙️</div>
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+      </div>
       <div class="nav-label">Cài đặt</div>
     </div>
   </nav>
 
   <!-- FAB -->
-  <div class="fab" onclick="openAddTransaction()">+</div>
+  <div class="fab" id="fabBtn" onclick="openAddTransaction()">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+  </div>
 
   <!-- ===== MODALS ===== -->
 
@@ -1442,14 +1433,15 @@ function monthExpense(year, month, wid){
 
 /* ---------- Điều hướng màn hình ---------- */
 function switchScreen(name){
-  const toolScreens = ['budget','savings','ai'];
+  const toolScreens = ['budget','savings','ai','chat'];
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const navEl = document.getElementById('nav-' + (toolScreens.includes(name) ? 'tools' : name));
   if (navEl) navEl.classList.add('active');
   currentScreen = name;
-  document.querySelector('.fab').style.display = (name === 'chat' || name === 'settings') ? 'none' : 'flex';
+  const fab = document.getElementById('fabBtn');
+  fab.style.display = (name === 'home' || name === 'transactions') ? 'flex' : 'none';
   renderAll();
 }
 function openTool(name){

@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/quick", "destination": "/quick-add.html" },
     { "source": "/", "destination": "/rolly-finance-app.html" }
   ]
 }

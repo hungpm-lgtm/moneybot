@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, interactive-widget=overlays-content">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#3D7D78">
+<title>Ghi nhanh</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal:      #5EA09B;
+  --teal-dark: #3D7D78;
+  --teal-lite: #E4F3F2;
+  --cream:     #EDE7DC;
+  --white:     #FFFFFF;
+  --pink:      #E4969E;
+  --gray:      #787068;
+  --gray-lite: #F0EBE3;
+  --text:      #282018;
+  --font: 'Be Vietnam Pro', sans-serif;
+  --r: 16px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  font-family: var(--font);
+  background: var(--cream);
+  min-height: 100dvh;
+  display: flex; flex-direction: column;
+  position: fixed; inset: 0;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(150deg, #3D7D78 0%, #5EA09B 100%);
+  padding: env(safe-area-inset-top, 12px) 20px 14px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
+  display: flex; align-items: center; justify-content: space-between;
+  position: relative; overflow: hidden; flex-shrink: 0;
+}
+.header::before {
+  content:''; position:absolute; width:160px; height:160px;
+  background:rgba(255,255,255,0.08); border-radius:50%;
+  top:-70px; right:-40px;
+}
+.header-left { display:flex; align-items:center; gap:10px; position:relative; z-index:1; }
+.header-icon {
+  width:40px; height:40px; background:rgba(255,255,255,0.2);
+  border-radius:12px; display:flex; align-items:center; justify-content:center;
+  font-size:20px;
+}
+.header-title { font-size:16px; font-weight:800; color:#fff; line-height:1.2; }
+.header-wallet { font-size:11px; color:rgba(255,255,255,0.7); font-weight:600; margin-top:1px; }
+.open-app-btn {
+  position:relative; z-index:1;
+  background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.3);
+  color:#fff; font-family:var(--font); font-size:12px; font-weight:700;
+  padding:6px 14px; border-radius:20px; text-decoration:none;
+  backdrop-filter:blur(8px);
+}
+
+/* ── Scroll content ── */
+.content {
+  flex:1; overflow-y:auto; padding:16px 16px 0;
+  display:flex; flex-direction:column; gap:14px;
+  scrollbar-width:none;
+}
+.content::-webkit-scrollbar { display:none; }
+
+/* ── Section label ── */
+.section-label {
+  font-size:10px; font-weight:700; color:var(--gray);
+  letter-spacing:0.8px; text-transform:uppercase; margin-bottom:8px;
+}
+
+/* ── Category grid ── */
+.cat-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+}
+.cat-btn {
+  background:var(--white); border:2px solid transparent;
+  border-radius:var(--r); padding:10px 6px;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  cursor:pointer; transition:all 0.15s; box-shadow:0 2px 8px rgba(80,65,50,0.07);
+  user-select:none;
+}
+.cat-btn:active { transform:scale(0.96); }
+.cat-btn.selected {
+  background:var(--teal-lite); border-color:var(--teal);
+}
+.cat-btn .icon { font-size:22px; }
+.cat-btn .name {
+  font-size:10px; font-weight:700; color:var(--gray);
+  text-align:center; line-height:1.2;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;
+}
+.cat-btn.selected .name { color:var(--teal-dark); }
+
+/* ── Amount grid ── */
+.amount-grid {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
+}
+.amt-btn {
+  background:var(--white); border:2px solid transparent;
+  border-radius:var(--r); padding:14px 6px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font); font-size:15px; font-weight:800; color:var(--text);
+  cursor:pointer; transition:all 0.15s; box-shadow:0 2px 8px rgba(80,65,50,0.07);
+  user-select:none;
+}
+.amt-btn:active { transform:scale(0.96); }
+.amt-btn.selected {
+  background:var(--teal-dark); border-color:var(--teal-dark); color:#fff;
+}
+.custom-amt-row {
+  display:flex; gap:8px; align-items:center; margin-top:4px;
+}
+.custom-input {
+  flex:1; padding:12px 14px; background:var(--white);
+  border:2px solid var(--gray-lite); border-radius:var(--r);
+  font-family:var(--font); font-size:15px; font-weight:700; color:var(--text);
+  outline:none; text-align:right;
+}
+.custom-input:focus { border-color:var(--teal); }
+.custom-input::placeholder { color:#C0B8A8; font-weight:400; }
+
+/* ── Note input ── */
+.note-input {
+  width:100%; padding:12px 14px; background:var(--white);
+  border:2px solid transparent; border-radius:var(--r);
+  font-family:var(--font); font-size:14px; color:var(--text);
+  outline:none;
+}
+.note-input:focus { border-color:var(--teal); }
+.note-input::placeholder { color:#B0A898; }
+
+/* ── Save button ── */
+.save-btn {
+  width:100%; padding:16px;
+  background:linear-gradient(135deg, #60AAA5 0%, #3D7D78 100%);
+  color:#fff; border:none; border-radius:var(--r);
+  font-family:var(--font); font-size:16px; font-weight:800;
+  cursor:pointer; transition:all 0.15s;
+  box-shadow:0 4px 16px rgba(61,125,120,0.35);
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.save-btn:active { transform:scale(0.98); }
+.save-btn:disabled { background:#C0B8A8; box-shadow:none; cursor:not-allowed; }
+
+/* ── Preview bar ── */
+.preview-bar {
+  background:var(--white); border-radius:var(--r); padding:12px 16px;
+  display:flex; align-items:center; gap:10px;
+  box-shadow:0 2px 8px rgba(80,65,50,0.07); min-height:52px;
+}
+.preview-icon { font-size:24px; }
+.preview-text { flex:1; }
+.preview-cat { font-size:13px; font-weight:700; color:var(--gray); }
+.preview-amount { font-size:20px; font-weight:800; color:var(--teal-dark); margin-top:2px; }
+.preview-placeholder { font-size:13px; color:#B0A898; font-weight:500; }
+
+/* ── Recent list ── */
+.recent-item {
+  background:var(--white); border-radius:12px; padding:10px 14px;
+  display:flex; align-items:center; gap:10px;
+  box-shadow:0 1px 6px rgba(80,65,50,0.06);
+}
+.recent-icon { font-size:18px; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+.recent-info { flex:1; }
+.recent-cat { font-size:12px; font-weight:700; color:var(--text); }
+.recent-note { font-size:11px; color:var(--gray); margin-top:1px; }
+.recent-amt { font-size:13px; font-weight:800; color:var(--pink); }
+.recent-time { font-size:10px; color:#B0A898; margin-top:2px; text-align:right; }
+
+/* ── Footer ── */
+.footer {
+  padding:12px 20px calc(env(safe-area-inset-bottom, 0px) + 12px);
+  text-align:center; flex-shrink:0;
+}
+.footer a { font-size:12px; color:var(--teal-dark); font-weight:600; text-decoration:none; }
+
+/* ── Success overlay ── */
+.success-overlay {
+  position:fixed; inset:0; background:rgba(61,125,120,0.92);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  z-index:999; opacity:0; pointer-events:none; transition:opacity 0.2s;
+}
+.success-overlay.show { opacity:1; pointer-events:auto; }
+.success-check { font-size:64px; margin-bottom:12px; animation:pop 0.3s ease; }
+.success-text { font-size:18px; font-weight:800; color:#fff; margin-bottom:6px; }
+.success-sub { font-size:13px; color:rgba(255,255,255,0.8); font-weight:600; }
+
+@keyframes pop { from { transform:scale(0.5); opacity:0; } to { transform:scale(1); opacity:1; } }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-icon">⚡</div>
+    <div>
+      <div class="header-title">Ghi nhanh</div>
+      <div class="header-wallet" id="walletLabel">💼 —</div>
+    </div>
+  </div>
+  <a href="rolly-finance-app.html" class="open-app-btn">Mở app ↗</a>
+</div>
+
+<!-- Scrollable content -->
+<div class="content">
+
+  <!-- Preview bar -->
+  <div class="preview-bar" id="previewBar">
+    <div class="preview-placeholder">Chọn danh mục và số tiền bên dưới...</div>
+  </div>
+
+  <!-- Categories -->
+  <div>
+    <div class="section-label">Danh mục chi</div>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+
+  <!-- Amounts -->
+  <div>
+    <div class="section-label">Số tiền</div>
+    <div class="amount-grid" id="amountGrid"></div>
+    <div class="custom-amt-row" style="margin-top:8px;">
+      <input class="custom-input" id="customAmt" type="text" inputmode="numeric"
+        placeholder="Số tiền khác..." autocomplete="off"/>
+    </div>
+  </div>
+
+  <!-- Note -->
+  <div>
+    <input class="note-input" id="noteInput" placeholder="✏️  Ghi chú (tùy chọn)..."/>
+  </div>
+
+  <!-- Save -->
+  <button class="save-btn" id="saveBtn" onclick="save()" disabled>
+    <span>✓ Lưu ngay</span>
+  </button>
+
+  <!-- Recent -->
+  <div id="recentSection" style="display:none;">
+    <div class="section-label">Gần đây</div>
+    <div style="display:flex;flex-direction:column;gap:6px;" id="recentList"></div>
+  </div>
+
+  <div style="height:4px;"></div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <a href="rolly-finance-app.html">Xem đầy đủ lịch sử giao dịch →</a>
+</div>
+
+<!-- Success overlay -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-check">✅</div>
+  <div class="success-text" id="successText">Đã lưu!</div>
+  <div class="success-sub" id="successSub"></div>
+</div>
+
+<script>
+/* ── Hằng số ── */
+const STORE_KEY = 'moneybot_v1';
+const PRESET_AMTS = [30000, 50000, 100000, 200000];
+const DEFAULT_CATS = [
+  {name:'Thức ăn & Đồ uống', icon:'🍽️', color:'#F472B6'},
+  {name:'Giao thông', icon:'⛽', color:'#34D399'},
+  {name:'Nhà', icon:'🏠', color:'#3B82F6'},
+  {name:'Giải trí', icon:'🎮', color:'#FBBF24'},
+  {name:'Mua sắm', icon:'🛍️', color:'#10B981'},
+  {name:'Khác', icon:'📦', color:'#9CA3AF'},
+];
+
+/* ── Trạng thái ── */
+let selCat = null;
+let selAmt = null;
+let customAmtValue = null;
+let db = null;
+
+/* ── Utils ── */
+function pad(n){ return n < 10 ? '0'+n : ''+n; }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+function nowTimeStr(){
+  const d = new Date();
+  return pad(d.getHours())+':'+pad(d.getMinutes());
+}
+function fmtAmt(n){
+  return Math.round(Math.abs(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+function fmtShort(n){
+  if (n >= 1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'').replace('.',',')+'tr';
+  if (n >= 1e3) return Math.round(n/1e3)+'k';
+  return ''+n;
+}
+
+/* ── Load data ── */
+function loadDB(){
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) db = JSON.parse(raw);
+  } catch(e){}
+  if (!db) db = { wallets:[], transactions:[], budgets:[], savings:[], debts:[], challenges:[], categories:{expense:DEFAULT_CATS,income:[]}, profile:{name:'Người dùng',code:''}, settings:{} };
+  db.wallets = db.wallets || [];
+  db.transactions = db.transactions || [];
+  db.categories = db.categories || {expense:DEFAULT_CATS, income:[]};
+  if (!db.categories.expense || !db.categories.expense.length) db.categories.expense = DEFAULT_CATS;
+  if (db.wallets.length === 0){
+    const w = {id:'w1', name:'Ví của tôi', icon:'💼', currency:'VND', initialBalance:0};
+    db.wallets.push(w);
+    db.settings.activeWalletId = w.id;
+  }
+}
+
+function saveDB(){
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(db)); } catch(e){}
+}
+
+/* ── Render wallet label ── */
+function renderWallet(){
+  const wid = db.settings.activeWalletId;
+  const w = db.wallets.find(x=>x.id===wid) || db.wallets[0];
+  if (w) document.getElementById('walletLabel').textContent = (w.icon||'💼') + ' ' + w.name;
+}
+
+/* ── Render categories ── */
+function renderCats(){
+  const cats = (db.categories.expense || DEFAULT_CATS).slice(0, 9); // max 9 (3x3 grid)
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML = cats.map(c =>
+    `<div class="cat-btn ${selCat===c.name?'selected':''}" onclick="selectCat('${encodeURIComponent(c.name)}','${encodeURIComponent(c.icon)}')">
+      <span class="icon">${c.icon}</span>
+      <span class="name">${c.name}</span>
+    </div>`
+  ).join('');
+}
+
+/* ── Render amounts ── */
+function renderAmts(){
+  const grid = document.getElementById('amountGrid');
+  grid.innerHTML = PRESET_AMTS.map(a =>
+    `<div class="amt-btn ${selAmt===a&&!customAmtValue?'selected':''}" onclick="selectAmt(${a})">
+      ${fmtShort(a)}
+    </div>`
+  ).join('');
+}
+
+/* ── Render preview ── */
+let selCatIcon = '';
+function renderPreview(){
+  const bar = document.getElementById('previewBar');
+  const eff = effectiveAmt();
+  if (!selCat && !eff) {
+    bar.innerHTML = '<div class="preview-placeholder">Chọn danh mục và số tiền bên dưới...</div>';
+    return;
+  }
+  const catPart = selCat ? `<div class="preview-cat">${selCatIcon} ${selCat}</div>` : `<div class="preview-cat" style="color:#E4969E;">⚠ Chọn danh mục</div>`;
+  const amtPart = eff ? `<div class="preview-amount">₫${fmtAmt(eff)}</div>` : `<div class="preview-cat" style="color:#E4969E;">⚠ Chọn số tiền</div>`;
+  bar.innerHTML = `<div class="preview-icon">${selCatIcon||'❓'}</div><div class="preview-text">${catPart}${amtPart}</div>`;
+}
+
+/* ── Render recent ── */
+function renderRecent(){
+  const txs = db.transactions
+    .filter(t => t.type==='expense')
+    .slice(-5).reverse();
+  const sec = document.getElementById('recentSection');
+  const list = document.getElementById('recentList');
+  if (txs.length === 0) { sec.style.display='none'; return; }
+  sec.style.display='block';
+  list.innerHTML = txs.map(t => {
+    const cat = (db.categories.expense||DEFAULT_CATS).find(c=>c.name===t.category) || {icon:'📦',color:'#9CA3AF'};
+    return `<div class="recent-item">
+      <div class="recent-icon" style="background:${cat.color}22">${cat.icon}</div>
+      <div class="recent-info">
+        <div class="recent-cat">${t.category}</div>
+        <div class="recent-note">${t.note||''}</div>
+      </div>
+      <div>
+        <div class="recent-amt">₫${fmtAmt(t.amount)}</div>
+        <div class="recent-time">${t.time||''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Selections ── */
+function selectCat(enc, iconEnc){
+  selCat = decodeURIComponent(enc);
+  selCatIcon = decodeURIComponent(iconEnc);
+  renderCats(); renderPreview(); updateSaveBtn();
+}
+
+function selectAmt(a){
+  selAmt = a; customAmtValue = null;
+  document.getElementById('customAmt').value = '';
+  renderAmts(); renderPreview(); updateSaveBtn();
+  // Auto-save nếu đã chọn danh mục
+  if (selCat) save();
+}
+
+function effectiveAmt(){
+  if (customAmtValue > 0) return customAmtValue;
+  return selAmt || null;
+}
+
+function updateSaveBtn(){
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = !(selCat && effectiveAmt());
+}
+
+/* ── Custom amount ── */
+document.getElementById('customAmt').addEventListener('input', function(){
+  const raw = this.value.replace(/\./g,'').replace(/\D/g,'');
+  const n = parseInt(raw,10) || 0;
+  // Format hiển thị
+  if (raw) this.value = n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  customAmtValue = n > 0 ? n : null;
+  selAmt = null;
+  renderAmts(); renderPreview(); updateSaveBtn();
+});
+
+/* ── Save ── */
+function save(){
+  const amt = effectiveAmt();
+  if (!selCat || !amt) {
+    if (!selCat) highlight('catGrid'); return;
+  }
+  const note = document.getElementById('noteInput').value.trim();
+  const tx = {
+    id: uid(),
+    walletId: db.settings.activeWalletId || db.wallets[0].id,
+    type: 'expense',
+    amount: amt,
+    category: selCat,
+    note: note,
+    date: todayStr(),
+    time: nowTimeStr(),
+  };
+  db.transactions.push(tx);
+  saveDB();
+  showSuccess(amt, note);
+}
+
+function showSuccess(amt, note){
+  document.getElementById('successText').textContent = '✓ Đã lưu ₫' + fmtAmt(amt);
+  document.getElementById('successSub').textContent = selCat + (note ? ' · ' + note : '') + ' · ' + nowTimeStr();
+  const ov = document.getElementById('successOverlay');
+  ov.classList.add('show');
+  setTimeout(() => {
+    ov.classList.remove('show');
+    // Reset amount, giữ category để ghi nhanh cùng loại
+    selAmt = null; customAmtValue = null;
+    document.getElementById('customAmt').value = '';
+    document.getElementById('noteInput').value = '';
+    renderAmts(); renderPreview(); updateSaveBtn();
+    renderRecent();
+  }, 1400);
+}
+
+function highlight(id){
+  const el = document.getElementById(id);
+  el.style.animation = 'none';
+  el.offsetHeight;
+  el.style.animation = 'shake 0.3s ease';
+  setTimeout(()=>el.style.animation='', 300);
+}
+
+/* ── CSS shake animation ── */
+const style = document.createElement('style');
+style.textContent = '@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }';
+document.head.appendChild(style);
+
+/* ── Khởi động ── */
+loadDB();
+renderWallet();
+renderCats();
+renderAmts();
+renderPreview();
+renderRecent();
+</script>
+</body>
+</html>

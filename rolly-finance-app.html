@@ -791,6 +791,37 @@ body {
 .tx-search-row { background: white; padding: 8px 16px; border-bottom: 1px solid var(--gray-100); display: none; }
 .tx-search-row.show { display: block; }
 .cat-chip p { min-height: 24px; display: flex; align-items: center; justify-content: center; }
+
+/* Tổng tài sản header */
+.total-assets-header {
+  background: linear-gradient(135deg, var(--teal-dark) 0%, #00695C 100%);
+  padding: 18px 20px 14px;
+  flex-shrink: 0;
+}
+.total-assets-label { font-size: 12px; color: rgba(255,255,255,0.75); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+.total-assets-amount { font-size: 32px; font-weight: 800; color: white; margin: 4px 0 12px; letter-spacing: -0.5px; }
+.wallet-chips-row { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.wallet-chips-row::-webkit-scrollbar { display: none; }
+.wallet-chip-btn {
+  flex-shrink: 0; padding: 6px 14px;
+  border-radius: 20px; border: 1.5px solid rgba(255,255,255,0.35);
+  font-family: var(--font); font-size: 12px; font-weight: 600;
+  color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.12);
+  cursor: pointer; white-space: nowrap; transition: all 0.2s;
+}
+.wallet-chip-btn.active { background: white; color: var(--teal-dark); border-color: white; }
+.wallet-chip-btn.add-chip { border-style: dashed; }
+
+/* Wallet filter chips in transactions */
+.wallet-filter-row { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 10px 16px; background: white; border-bottom: 1px solid var(--gray-100); }
+.wallet-filter-row::-webkit-scrollbar { display: none; }
+.wf-chip {
+  flex-shrink: 0; padding: 5px 14px;
+  border-radius: 20px; border: 1.5px solid var(--gray-200);
+  font-family: var(--font); font-size: 12px; font-weight: 600;
+  color: var(--gray-500); background: white; cursor: pointer; white-space: nowrap;
+}
+.wf-chip.active { background: var(--teal-light); border-color: var(--teal); color: var(--teal-dark); }
 </style>
 </head>
 <body>
@@ -799,30 +830,40 @@ body {
 
   <!-- ===== HOME SCREEN ===== -->
   <div class="screen active" id="screen-home">
-    <div class="wallet-section" id="walletSection"></div>
 
-    <div class="period-selector" id="periodSelector">
-      <button class="period-btn active" data-period="month" onclick="setPeriod('month')">Tháng</button>
-      <button class="period-btn" data-period="week" onclick="setPeriod('week')">Tuần</button>
-      <button class="period-btn" data-period="day" onclick="setPeriod('day')">Ngày</button>
-      <button class="period-btn" data-period="year" onclick="setPeriod('year')">Năm</button>
+    <!-- Tổng tài sản + danh sách ví -->
+    <div class="total-assets-header" id="totalAssetsHeader">
+      <div class="total-assets-label">Tổng tài sản</div>
+      <div class="total-assets-amount" id="totalAssetsAmount">₫0</div>
+      <div class="wallet-chips-row" id="walletChipsRow"></div>
     </div>
 
-    <div class="month-selector">
-      <span class="nav-arrow" onclick="navPeriod(-1)">‹</span>
-      <span class="period-label" id="periodLabel">—</span>
-      <span class="nav-arrow" onclick="navPeriod(1)">›</span>
+    <!-- Cuộn được phần dưới -->
+    <div style="flex:1; overflow-y:auto; scrollbar-width:none;" id="homeScroll">
+
+      <div class="period-selector" id="periodSelector" style="background:white; padding:12px 16px; display:flex; gap:8px; border-bottom:1px solid var(--gray-100);">
+        <button class="period-btn active" data-period="month" onclick="setPeriod('month')">Tháng</button>
+        <button class="period-btn" data-period="week" onclick="setPeriod('week')">Tuần</button>
+        <button class="period-btn" data-period="day" onclick="setPeriod('day')">Ngày</button>
+        <button class="period-btn" data-period="year" onclick="setPeriod('year')">Năm</button>
+      </div>
+
+      <div style="background:white; padding:8px 16px 12px; display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--gray-100);">
+        <span class="nav-arrow" onclick="navPeriod(-1)">‹</span>
+        <span class="period-label" id="periodLabel">—</span>
+        <span class="nav-arrow" onclick="navPeriod(1)">›</span>
+      </div>
+
+      <div class="summary-card" id="summaryCard" style="margin:12px 16px;"></div>
+
+      <div class="tab-row">
+        <button class="tab-btn" id="tabExpense" onclick="setHomeTab('expense')">Chi phí</button>
+        <button class="tab-btn inactive" id="tabIncome" onclick="setHomeTab('income')">Thu nhập</button>
+      </div>
+
+      <div class="chart-container" id="chartContainer"></div>
+      <div style="height:80px"></div>
     </div>
-
-    <div class="summary-card" id="summaryCard"></div>
-
-    <div class="tab-row">
-      <button class="tab-btn" id="tabExpense" onclick="setHomeTab('expense')">Chi phí</button>
-      <button class="tab-btn inactive" id="tabIncome" onclick="setHomeTab('income')">Thu nhập</button>
-    </div>
-
-    <div class="chart-container" id="chartContainer"></div>
-    <div style="height:16px"></div>
   </div>
 
   <!-- ===== TRANSACTIONS SCREEN ===== -->
@@ -840,11 +881,10 @@ body {
       <input class="form-input" id="txSearch" placeholder="Tìm theo ghi chú hoặc danh mục..." oninput="renderTransactions()"/>
     </div>
 
-    <div style="background:white; padding:8px 16px; border-bottom:1px solid #F3F4F6;">
-      <div id="txWalletChip"></div>
-    </div>
+    <!-- Wallet filter chips -->
+    <div class="wallet-filter-row" id="txWalletFilter"></div>
 
-    <div style="background:white; padding:8px 16px; display:flex; gap:8px; align-items:center; border-bottom:1px solid #F3F4F6;">
+    <div style="background:white; padding:6px 16px 10px; display:flex; gap:8px; align-items:center; border-bottom:1px solid #F3F4F6;">
       <span class="nav-arrow" onclick="navPeriod(-1)">‹</span>
       <span class="period-label" id="txPeriodLabel" style="font-size:13px;">—</span>
       <span class="nav-arrow" onclick="navPeriod(1)">›</span>
@@ -1415,9 +1455,16 @@ function navMonth(dir){ const a = new Date(anchor); a.setMonth(a.getMonth()+dir)
 function setHomeTab(t){ homeTab = t; renderAll(); }
 
 /* ---------- Truy vấn dữ liệu ---------- */
-function txInPeriod(){
-  const r = periodRange(); const wid = db.settings.activeWalletId;
-  return db.transactions.filter(t => t.walletId === wid && pd(t.date) >= r.start && pd(t.date) < r.end);
+// txInPeriod: gộp TẤT CẢ ví (home/chart), hoặc lọc theo txWalletFilter (transactions screen)
+let txWalletFilter = 'all'; // 'all' hoặc walletId cụ thể
+
+function txInPeriod(walletId){
+  const r = periodRange();
+  const wid = walletId || null; // null = tất cả ví
+  return db.transactions.filter(t =>
+    (wid ? t.walletId === wid : true)
+    && pd(t.date) >= r.start && pd(t.date) < r.end
+  );
 }
 function walletBalance(wid){
   const w = db.wallets.find(x => x.id === wid); if (!w) return 0;
@@ -1425,9 +1472,18 @@ function walletBalance(wid){
   db.transactions.filter(t => t.walletId === wid).forEach(t => { bal += t.type === 'income' ? t.amount : -t.amount; });
   return bal;
 }
+function totalBalance(){
+  return db.wallets.reduce((s, w) => s + walletBalance(w.id), 0);
+}
+function monthExpenseAllWallets(year, month){
+  const start = new Date(year, month, 1), end = new Date(year, month+1, 1);
+  return db.transactions.filter(t => t.type === 'expense' && pd(t.date) >= start && pd(t.date) < end)
+    .reduce((s,t) => s + t.amount, 0);
+}
 function monthExpense(year, month, wid){
   const start = new Date(year, month, 1), end = new Date(year, month+1, 1);
-  return db.transactions.filter(t => t.walletId === wid && t.type === 'expense' && pd(t.date) >= start && pd(t.date) < end)
+  const filter = wid ? (t => t.walletId === wid) : () => true;
+  return db.transactions.filter(t => filter(t) && t.type === 'expense' && pd(t.date) >= start && pd(t.date) < end)
     .reduce((s,t) => s + t.amount, 0);
 }
 
@@ -1468,7 +1524,7 @@ function renderAll(){
   const pl = document.getElementById('periodLabel'); if (pl) pl.textContent = periodLabel();
   document.getElementById('tabExpense').className = 'tab-btn' + (homeTab === 'expense' ? '' : ' inactive');
   document.getElementById('tabIncome').className = 'tab-btn' + (homeTab === 'income' ? '' : ' inactive');
-  renderWallets();
+  renderTotalAssets();
   renderSummary();
   renderChart();
   renderTransactions();
@@ -1480,34 +1536,32 @@ function renderAll(){
   if (chip && w) chip.textContent = w.icon + ' ' + w.name;
 }
 
-function renderWallets(){
-  const el = document.getElementById('walletSection'); el.innerHTML = '';
-  db.wallets.forEach(w => {
-    const active = w.id === db.settings.activeWalletId;
-    const card = document.createElement('div');
-    card.className = 'wallet-card' + (active ? ' active' : '');
-    card.onclick = () => { db.settings.activeWalletId = w.id; saveDB(); renderAll(); };
-    card.innerHTML = '<div class="edit-btn">✏️</div>'
-      + '<div class="wallet-icon">' + (w.icon || '💼') + '</div>'
-      + '<div class="wallet-name">' + esc(w.name) + '</div>'
-      + '<div class="wallet-balance">' + fmtSigned(walletBalance(w.id), w.currency) + '</div>';
-    card.querySelector('.edit-btn').onclick = (e) => { e.stopPropagation(); openWalletModal(w.id); };
-    el.appendChild(card);
-  });
-  const add = document.createElement('div');
-  add.className = 'add-wallet-card';
-  add.onclick = () => openWalletModal(null);
-  add.innerHTML = '<span>+</span><p>Ví mới</p>';
-  el.appendChild(add);
+function renderTotalAssets(){
+  // Tổng tài sản
+  const total = totalBalance();
+  const el = document.getElementById('totalAssetsAmount');
+  if (el) el.textContent = fmtSigned(total);
+
+  // Danh sách ví dạng chip
+  const row = document.getElementById('walletChipsRow');
+  if (!row) return;
+  row.innerHTML = db.wallets.map(w => {
+    const bal = walletBalance(w.id);
+    return '<button class="wallet-chip-btn" onclick="openWalletModal(\'' + w.id + '\')">'
+      + (w.icon || '💼') + ' ' + esc(w.name)
+      + ' <span style="opacity:0.75;font-size:11px;margin-left:4px;">' + fmtSigned(bal, w.currency) + '</span>'
+      + '</button>';
+  }).join('') + '<button class="wallet-chip-btn add-chip" onclick="openWalletModal(null)">+ Thêm ví</button>';
 }
 
 function renderSummary(){
-  const txs = txInPeriod();
+  // Gộp TẤT CẢ ví
+  const txs = txInPeriod(); // không truyền wid = tất cả ví
   let exp = 0, inc = 0;
   txs.forEach(t => { if (t.type === 'income') inc += t.amount; else exp += t.amount; });
   const net = inc - exp;
   document.getElementById('summaryCard').innerHTML =
-      '<div class="summary-label">Thay đổi ròng</div>'
+      '<div class="summary-label">Thay đổi ròng (tất cả ví)</div>'
     + '<div class="summary-amount">' + fmtSigned(net) + '</div>'
     + '<div class="summary-row">'
     + '  <div class="summary-item"><div class="summary-item-label">Chi phí</div><div class="summary-item-amount">🔻 ' + fmt(exp) + '</div></div>'
@@ -1517,6 +1571,7 @@ function renderSummary(){
 
 function renderChart(){
   const el = document.getElementById('chartContainer');
+  // Gộp TẤT CẢ ví
   const txs = txInPeriod().filter(t => t.type === homeTab);
   const total = txs.reduce((s,t) => s + t.amount, 0);
   if (total === 0) {
@@ -1550,12 +1605,18 @@ function renderChart(){
 }
 
 function renderTransactions(){
-  const w = activeWallet();
-  const chip = document.getElementById('txWalletChip');
-  if (chip) chip.innerHTML = '<span class="wallet-chip-sm">' + (w ? w.icon + ' ' + esc(w.name) : '') + '</span>';
   const lbl = document.getElementById('txPeriodLabel'); if (lbl) lbl.textContent = periodLabel();
+
+  // Render wallet filter chips
+  const filterRow = document.getElementById('txWalletFilter');
+  if (filterRow) {
+    filterRow.innerHTML = '<button class="wf-chip' + (txWalletFilter === 'all' ? ' active' : '') + '" onclick="setTxFilter(\'all\')">Tất cả ví</button>'
+      + db.wallets.map(w => '<button class="wf-chip' + (txWalletFilter === w.id ? ' active' : '') + '" onclick="setTxFilter(\'' + w.id + '\')">' + (w.icon||'💼') + ' ' + esc(w.name) + '</button>').join('');
+  }
+
   const q = (document.getElementById('txSearch') ? document.getElementById('txSearch').value : '').trim().toLowerCase();
-  let txs = txInPeriod();
+  const filterWid = txWalletFilter === 'all' ? null : txWalletFilter;
+  let txs = txInPeriod(filterWid);
   if (q) txs = txs.filter(t => (t.note||'').toLowerCase().includes(q) || (t.category||'').toLowerCase().includes(q));
   let exp = 0, inc = 0;
   txs.forEach(t => { if (t.type === 'income') inc += t.amount; else exp += t.amount; });
@@ -1579,15 +1640,21 @@ function renderTransactions(){
       + '<span style="color:' + (dnet >= 0 ? 'var(--teal)' : 'var(--pink)') + '">' + fmtSigned(dnet) + '</span></div>';
     groups[d].forEach(t => {
       const m = catMeta(t.category, t.type);
+      const tw = db.wallets.find(w => w.id === t.walletId);
+      const walletTag = db.wallets.length > 1
+        ? '<span style="font-size:10px;color:var(--gray-400);margin-top:1px;">' + (tw ? tw.icon + ' ' + esc(tw.name) : '') + '</span>'
+        : '';
       html += '<div class="tx-item" onclick="openTxModal(\'' + t.id + '\')">'
         + '<div class="tx-icon" style="background:' + m.color + '22">' + m.icon + '</div>'
-        + '<div class="tx-info"><div class="tx-cat">' + esc(t.category) + '</div><div class="tx-note">' + esc(t.note||'') + '</div></div>'
-        + '<div class="tx-amount ' + t.type + '">' + (t.type === 'income' ? '🔺' : '🔻') + ' ' + fmt(t.amount, w ? w.currency : 'VND') + '</div></div>';
+        + '<div class="tx-info"><div class="tx-cat">' + esc(t.category) + '</div>'
+        + '<div class="tx-note">' + esc(t.note||'') + '</div>' + walletTag + '</div>'
+        + '<div class="tx-amount ' + t.type + '">' + (t.type === 'income' ? '🔺' : '🔻') + ' ' + fmt(t.amount, tw ? tw.currency : 'VND') + '</div></div>';
     });
     html += '</div>';
   });
   list.innerHTML = html;
 }
+function setTxFilter(wid){ txWalletFilter = wid; renderTransactions(); }
 
 function renderBudgets(){
   const lbl = document.getElementById('budgetMonthLabel'); if (lbl) lbl.textContent = monthLabel();
@@ -1650,10 +1717,11 @@ function renderInsights(){
   const wid = db.settings.activeWalletId;
   const y = anchor.getFullYear(), mo = anchor.getMonth();
   const start = new Date(y, mo, 1), end = new Date(y, mo+1, 1);
-  const monthTx = db.transactions.filter(t => t.walletId === wid && pd(t.date) >= start && pd(t.date) < end);
+  // Gộp tất cả ví
+  const monthTx = db.transactions.filter(t => pd(t.date) >= start && pd(t.date) < end);
   let exp = 0, inc = 0; const catMap = {};
   monthTx.forEach(t => { if (t.type === 'income') inc += t.amount; else { exp += t.amount; catMap[t.category] = (catMap[t.category]||0) + t.amount; } });
-  const prev = monthExpense(mo === 0 ? y-1 : y, mo === 0 ? 11 : mo-1, wid);
+  const prev = monthExpense(mo === 0 ? y-1 : y, mo === 0 ? 11 : mo-1, null);
   const cards = [];
 
   if (monthTx.length === 0) {
@@ -1664,13 +1732,13 @@ function renderInsights(){
     if (prev > 0) { const diff = Math.round((exp - prev) / prev * 100); cmp = diff >= 0 ? (' — nhiều hơn tháng trước <strong>' + diff + '%</strong>') : (' — ít hơn tháng trước <strong>' + Math.abs(diff) + '%</strong> 👏'); }
     const net = inc - exp;
     cards.push({bg:'#F0FDF4', bd:'#10B98130', icon:'📊', tc:'#059669', title:'Tổng quan ' + monthLabel().toLowerCase(),
-      text:'Bạn đã chi <strong>' + fmt(exp) + '</strong>' + cmp + '. Thu nhập <strong>' + fmt(inc) + '</strong>, ' + (net >= 0 ? 'dư <strong>' + fmt(net) + '</strong> 🎉' : 'âm <strong>' + fmt(net) + '</strong> ⚠️') + '.'});
+      text:'Tổng tài sản hiện tại <strong>' + fmt(totalBalance()) + '</strong>. Tháng này chi <strong>' + fmt(exp) + '</strong>' + cmp + '. Thu nhập <strong>' + fmt(inc) + '</strong>, ' + (net >= 0 ? 'dư <strong>' + fmt(net) + '</strong> 🎉' : 'thiếu <strong>' + fmt(Math.abs(net)) + '</strong> ⚠️') + '.'});
     // Top danh mục
     const top = Object.keys(catMap).map(k => ({k, v:catMap[k]})).sort((a,b) => b.v - a.v)[0];
     if (top) { const pct = Math.round(top.v / exp * 100); cards.push({bg:'#FDF4FF', bd:'#A855F730', icon:'🏷️', tc:'#9333EA', title:'Chi nhiều nhất', text:'Danh mục <strong>' + esc(top.k) + '</strong> chiếm <strong>' + pct + '%</strong> chi tiêu (' + fmt(top.v) + ').'}); }
-    // Cảnh báo ngân sách
+    // Cảnh báo ngân sách (tất cả ví)
     const overs = [];
-    db.budgets.filter(b => b.walletId === wid).forEach(b => {
+    db.budgets.forEach(b => {
       const sp = catMap[b.category] || 0;
       if (b.limit > 0 && sp > b.limit) overs.push(esc(b.category) + ' (vượt ' + fmt(sp - b.limit) + ')');
     });
@@ -1754,7 +1822,10 @@ function deleteTransaction(){
 /* ============================================================
    VÍ (CRUD)
    ============================================================ */
-function openWalletSettings(){ openWalletModal(db.settings.activeWalletId); }
+function openWalletSettings(){
+  if (db.wallets.length === 1) { openWalletModal(db.wallets[0].id); return; }
+  openWalletModal(db.wallets[0].id);
+}
 function openWalletModal(id){
   editingWalletId = id || null;
   const picker = document.getElementById('walletIconPicker');

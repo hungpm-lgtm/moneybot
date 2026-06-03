@@ -950,6 +950,110 @@ body { background: var(--bg); }
 
 /* Wallet section (ẩn — dùng total-assets-header thay thế) */
 .wallet-section { display: none !important; }
+
+/* ---- Wallet Grid (1.6) ---- */
+.wallet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; position: relative; z-index: 1; margin-top: 4px; }
+.wallet-grid-card {
+  background: rgba(255,255,255,0.20); border: 1px solid rgba(255,255,255,0.30);
+  border-radius: 16px; padding: 12px 14px; cursor: pointer;
+  backdrop-filter: blur(8px); transition: background 0.2s;
+}
+.wallet-grid-card:active { background: rgba(255,255,255,0.30); }
+.wallet-grid-card.add-card { border-style: dashed; opacity: 0.70; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 80px; }
+.wgc-icon { font-size: 18px; margin-bottom: 4px; }
+.wgc-name { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.85); line-height: 1.2; }
+.wgc-bal { font-size: 14px; font-weight: 800; color: #fff; margin-top: 4px; }
+.wgc-add-icon { font-size: 24px; color: rgba(255,255,255,0.70); }
+.wgc-add-label { font-size: 12px; color: rgba(255,255,255,0.70); font-weight: 600; }
+
+/* ---- Profile Card (1.4) ---- */
+.profile-card {
+  background: var(--white); margin: 16px; border-radius: var(--radius);
+  padding: 18px 16px; display: flex; align-items: center; gap: 14px;
+  box-shadow: var(--shadow-sm); cursor: pointer; position: relative;
+}
+.profile-avatar {
+  width: 54px; height: 54px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0;
+}
+.profile-info { flex: 1; }
+.profile-name { font-size: 17px; font-weight: 800; color: var(--gray-900); }
+.profile-code { font-size: 12px; color: var(--teal-dark); font-weight: 700; margin-top: 3px; letter-spacing: 1px; }
+.theme-toggle-btn {
+  width: 38px; height: 38px; background: var(--gray-100);
+  border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer; flex-shrink: 0;
+}
+
+/* ---- Debt Screen ---- */
+.debt-tabs { display: flex; background: var(--white); border-bottom: 1px solid var(--gray-100); padding: 0 16px; gap: 0; }
+.debt-tab {
+  flex: 1; padding: 12px 8px; font-family: var(--font); font-size: 13px; font-weight: 600;
+  color: var(--gray-400); background: transparent; border: none; border-bottom: 2px solid transparent;
+  cursor: pointer; transition: all 0.2s;
+}
+.debt-tab.active { color: var(--teal-dark); border-bottom-color: var(--teal-dark); }
+.debt-item {
+  background: var(--white); border-radius: var(--radius); padding: 16px;
+  box-shadow: var(--shadow-sm); margin: 0 16px 10px; position: relative;
+}
+.debt-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.debt-person { font-size: 15px; font-weight: 700; color: var(--gray-900); }
+.debt-type-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+}
+.debt-type-badge.lend { background: #E8F5E9; color: #2E7D32; }
+.debt-type-badge.borrow { background: #FFEBEE; color: #C62828; }
+.debt-amounts { margin-bottom: 8px; }
+.debt-total { font-size: 13px; color: var(--gray-500); }
+.debt-remaining { font-size: 18px; font-weight: 800; margin-top: 2px; }
+.debt-remaining.lend { color: #2E7D32; }
+.debt-remaining.borrow { color: var(--pink); }
+.debt-bar-bg { height: 6px; background: var(--gray-100); border-radius: 3px; margin: 8px 0; overflow: hidden; }
+.debt-bar { height: 6px; border-radius: 3px; background: var(--teal); }
+.debt-bar.borrow { background: var(--pink); }
+.debt-footer { display: flex; justify-content: space-between; font-size: 11px; color: var(--gray-400); font-weight: 600; }
+.debt-edit-btn { position: absolute; top: 12px; right: 12px; width: 26px; height: 26px; background: var(--gray-100); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+
+/* ---- Challenge Screen ---- */
+.challenge-item {
+  background: var(--white); border-radius: var(--radius); padding: 16px;
+  box-shadow: var(--shadow-sm); margin: 12px 16px 0; position: relative;
+}
+.challenge-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.challenge-name { font-size: 15px; font-weight: 700; color: var(--gray-900); }
+.challenge-status { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 10px; }
+.challenge-status.pass { background: #E8F5E9; color: #2E7D32; }
+.challenge-status.fail { background: #FFEBEE; color: #C62828; }
+.challenge-status.ongoing { background: var(--teal-light); color: var(--teal-dark); }
+.challenge-amounts { font-size: 13px; color: var(--gray-500); margin-bottom: 6px; }
+.challenge-bar-bg { height: 8px; background: var(--gray-100); border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
+.challenge-bar { height: 8px; border-radius: 4px; background: var(--teal); transition: width 0.5s; }
+.challenge-bar.danger { background: var(--pink); }
+.challenge-footer { display: flex; justify-content: space-between; font-size: 11px; color: var(--gray-400); font-weight: 600; }
+.challenge-edit-btn { position: absolute; top: 12px; right: 12px; width: 26px; height: 26px; background: var(--gray-100); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+
+/* ---- Calendar (1.7) ---- */
+.calendar-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+.cal-dow { text-align: center; font-size: 10px; font-weight: 700; color: var(--gray-400); padding: 4px 0 8px; }
+.cal-day {
+  border-radius: 10px; padding: 6px 2px 4px;
+  text-align: center; min-height: 52px; cursor: pointer; transition: background 0.15s;
+}
+.cal-day:active { background: var(--gray-100); }
+.cal-day-num { font-size: 12px; font-weight: 700; color: var(--gray-700); }
+.cal-day.today .cal-day-num { color: var(--teal-dark); }
+.cal-day.today { background: var(--teal-light); }
+.cal-day.empty { cursor: default; }
+.cal-day.other-month .cal-day-num { color: var(--gray-300); }
+.cal-amount { font-size: 9px; font-weight: 700; margin-top: 2px; line-height: 1.2; }
+.cal-amount.neg { color: var(--pink); }
+.cal-amount.pos { color: #2E7D32; }
+
+/* ---- Transfer tx in list ---- */
+.tx-amount.transfer { color: var(--purple) !important; }
 </style>
 </head>
 <body>
@@ -1000,8 +1104,7 @@ body { background: var(--bg); }
       <div class="screen-title">Giao dịch</div>
       <div class="header-actions">
         <div class="header-btn" onclick="toggleSearch()">🔍</div>
-        <div class="header-btn" onclick="goToday()">📅</div>
-        <div class="header-btn" onclick="openAIAnalysis()">✨</div>
+        <div class="header-btn" onclick="openCalendar()">📅</div>
       </div>
     </div>
 
@@ -1050,10 +1153,10 @@ body { background: var(--bg); }
       </div>
 
       <div class="tool-card" onclick="openTool('debt')">
-        <div class="tool-icon-wrap" style="background: linear-gradient(135deg,#EF4444,#DC2626)">📵</div>
+        <div class="tool-icon-wrap" style="background: linear-gradient(135deg,#EF4444,#DC2626)">🤝</div>
         <div class="tool-info">
           <div class="tool-name">Món nợ</div>
-          <div class="tool-desc">Theo dõi các khoản nợ của bạn và nỗ lực trả hết chúng!</div>
+          <div class="tool-desc">Theo dõi tiền cho vay &amp; tiền đang nợ — biết rõ ai nợ ai bao nhiêu</div>
         </div>
         <div class="tool-arrow">›</div>
       </div>
@@ -1062,17 +1165,16 @@ body { background: var(--bg); }
         <div class="tool-icon-wrap" style="background: linear-gradient(135deg,#F59E0B,#D97706)">🏆</div>
         <div class="tool-info">
           <div class="tool-name">Thử thách</div>
-          <div class="tool-desc">Cạnh tranh với bạn bè để tiết kiệm nhiều hơn, theo dõi tiến trình và leo lên bảng xếp hạng.</div>
+          <div class="tool-desc">Đặt thử thách chi tiêu có kỳ hạn — kiểm soát bản thân và tạo thói quen tốt</div>
         </div>
         <div class="tool-arrow">›</div>
       </div>
 
-      <div class="tool-card" onclick="showToast('Đã mở tính năng VIP!')" style="border:2px solid #3B82F620; background: linear-gradient(135deg,#EFF6FF,white)">
-        <div class="vip-badge">⭐ VIP</div>
-        <div class="tool-icon-wrap" style="background: linear-gradient(135deg,#3B82F6,#1D4ED8)">📈</div>
+      <div class="tool-card" onclick="openTransferModal()">
+        <div class="tool-icon-wrap" style="background: linear-gradient(135deg,#8B5CF6,#6D28D9)">⇄</div>
         <div class="tool-info">
-          <div class="tool-name">Báo cáo nâng cao</div>
-          <div class="tool-desc">Xuất báo cáo chi tiết, biểu đồ xu hướng, so sánh tháng/năm</div>
+          <div class="tool-name">Chuyển khoản</div>
+          <div class="tool-desc">Chuyển tiền giữa các ví — không ảnh hưởng thu/chi</div>
         </div>
         <div class="tool-arrow">›</div>
       </div>
@@ -1081,9 +1183,15 @@ body { background: var(--bg); }
 
   <!-- ===== SETTINGS SCREEN ===== -->
   <div class="screen" id="screen-settings">
-    <div class="settings-bot">
-      <div class="theme-toggle" onclick="showToast('Chuyển giao diện!')">☀️</div>
-      <div class="big-bot-avatar">🤖</div>
+
+    <!-- Profile card -->
+    <div class="profile-card" onclick="openProfileModal()">
+      <div class="profile-avatar" id="profileAvatar">👤</div>
+      <div class="profile-info">
+        <div class="profile-name" id="profileName">Người dùng</div>
+        <div class="profile-code" id="profileCode">Mã ví: ---</div>
+      </div>
+      <div class="theme-toggle-btn" onclick="event.stopPropagation(); showToast('Tính năng đổi giao diện sẽ sớm có!')">☀️</div>
     </div>
 
     <div class="settings-list">
@@ -1113,50 +1221,31 @@ body { background: var(--bg); }
         </div>
         <div class="settings-arrow">›</div>
       </div>
-
     </div>
 
     <div style="height:16px"></div>
   </div>
 
-  <!-- ===== AI CHAT SCREEN ===== -->
-  <div class="screen" id="screen-chat">
-    <div class="chat-header">
-      <div class="back-btn" onclick="switchScreen('home')">‹</div>
-      <div class="bot-avatar">🤖</div>
-      <div class="chat-info">
-        <div class="chat-name">MoneyBot AI</div>
-        <div class="chat-status">● Đang hoạt động</div>
-      </div>
-      <div class="settings-btn">⚙️</div>
+  <!-- ===== DEBT SCREEN ===== -->
+  <div class="screen" id="screen-debt">
+    <div class="screen-header">
+      <div class="back-btn" style="font-size:20px;cursor:pointer;" onclick="switchScreen('tools')">‹ Món nợ</div>
+      <div class="header-btn" onclick="openDebtModal(null)">+</div>
     </div>
+    <div class="debt-tabs">
+      <button class="debt-tab active" id="debtTabLend" onclick="setDebtTab('lend')">💸 Tôi cho vay</button>
+      <button class="debt-tab" id="debtTabBorrow" onclick="setDebtTab('borrow')">📥 Tôi đang nợ</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding-bottom:80px;" id="debtList"></div>
+  </div>
 
-    <div class="chat-bot-intro">
-      <div class="big-bot-avatar">🤖</div>
-      <div class="bot-speech-bubble">Hôm nay bạn đã chi tiêu gì?</div>
-      <div class="chat-session-info">Nhập kiểu "ăn trưa 50k" để ghi nhanh giao dịch</div>
-      <div class="wallet-chip" id="chatWalletChip">💼</div>
+  <!-- ===== CHALLENGE SCREEN ===== -->
+  <div class="screen" id="screen-challenge">
+    <div class="screen-header">
+      <div class="back-btn" style="font-size:20px;cursor:pointer;" onclick="switchScreen('tools')">‹ Thử thách</div>
+      <div class="header-btn" onclick="openChallengeModal(null)">+</div>
     </div>
-
-    <div class="chat-messages" id="chatMessages">
-      <div class="msg-bot">Xin chào! 👋 Hãy bắt đầu thêm giao dịch của bạn tại đây nhé!</div>
-    </div>
-
-    <div class="quick-actions">
-      <button class="quick-btn" onclick="quickTransfer()">⇄ Di chuyển quỹ</button>
-      <button class="quick-btn" onclick="quickRecurring()">↻ Giao dịch định kỳ</button>
-    </div>
-
-    <div style="text-align:center; padding:4px 0;">
-      <span class="custom-rules">⚙️ Đặt quy tắc tùy chỉnh</span>
-    </div>
-
-    <div class="chat-input-row">
-      <input class="chat-input" id="chatInput" placeholder="bữa tối 100k, mua sắm 400k"
-        onkeydown="if(event.key==='Enter') sendChatMessage()"/>
-      <div class="mic-btn" onclick="showToast('Đang nghe...')">🎤</div>
-      <div class="cam-btn" onclick="showToast('Quét hóa đơn VIP!')">📷</div>
-    </div>
+    <div style="flex:1;overflow-y:auto;padding-bottom:80px;" id="challengeList"></div>
   </div>
 
   <!-- ===== BUDGET TOOL SCREEN ===== -->
@@ -1402,6 +1491,150 @@ body { background: var(--bg); }
     </div>
   </div>
 
+  <!-- ===== TRANSFER MODAL ===== -->
+  <div class="modal-overlay" id="modal-transfer" onclick="closeModal('modal-transfer')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-title">⇄ Chuyển khoản</div>
+      <div class="add-tx-form">
+        <div class="form-group">
+          <div class="form-label">Từ ví</div>
+          <select class="form-input" id="transferFrom"></select>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Đến ví</div>
+          <select class="form-input" id="transferTo"></select>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Số tiền (₫)</div>
+          <input class="form-input" id="transferAmount" type="text" inputmode="numeric" placeholder="0" autocomplete="off"/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Ngày</div>
+          <input class="form-input" id="transferDate" type="date"/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Ghi chú</div>
+          <input class="form-input" id="transferNote" placeholder="VD: Rút ATM, chuyển quỹ..."/>
+        </div>
+        <button class="submit-btn" onclick="submitTransfer()">⇄ Xác nhận chuyển</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DEBT MODAL ===== -->
+  <div class="modal-overlay" id="modal-debt" onclick="closeModal('modal-debt')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="debtModalTitle">Thêm khoản nợ</div>
+      <div class="add-tx-form">
+        <div class="form-group">
+          <div class="form-label">Loại</div>
+          <div class="type-toggle">
+            <button class="type-btn expense active" id="debtTypeLend" onclick="setDebtType('lend')">💸 Tôi cho vay</button>
+            <button class="type-btn income" id="debtTypeBorrow" onclick="setDebtType('borrow')">📥 Tôi đang nợ</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Tên người</div>
+          <input class="form-input" id="debtPerson" placeholder="VD: Anh Nam, Chị Lan..."/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Số tiền gốc (₫)</div>
+          <input class="form-input" id="debtAmount" type="text" inputmode="numeric" placeholder="0" autocomplete="off"/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Đã trả/thu được (₫)</div>
+          <input class="form-input" id="debtPaid" type="text" inputmode="numeric" placeholder="0" autocomplete="off"/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Ngày bắt đầu</div>
+          <input class="form-input" id="debtDate" type="date"/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Hạn trả (tuỳ chọn)</div>
+          <input class="form-input" id="debtDue" type="date"/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Ghi chú</div>
+          <input class="form-input" id="debtNote" placeholder="Mục đích..."/>
+        </div>
+        <button class="submit-btn" onclick="submitDebt()">💾 Lưu</button>
+        <button class="danger-btn" id="debtDeleteBtn" style="display:none" onclick="deleteDebt()">🗑 Xoá</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CHALLENGE MODAL ===== -->
+  <div class="modal-overlay" id="modal-challenge" onclick="closeModal('modal-challenge')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="challengeModalTitle">Tạo thử thách</div>
+      <div class="add-tx-form">
+        <div class="form-group">
+          <div class="form-label">Tên thử thách</div>
+          <input class="form-input" id="challengeName" placeholder="VD: Không mua sắm tuần này"/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Danh mục (bỏ trống = tất cả)</div>
+          <select class="form-input" id="challengeCategory">
+            <option value="">Tất cả danh mục</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Ngân sách tối đa (₫)</div>
+          <input class="form-input" id="challengeLimit" type="text" inputmode="numeric" placeholder="0" autocomplete="off"/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Từ ngày</div>
+          <input class="form-input" id="challengeStart" type="date"/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Đến ngày</div>
+          <input class="form-input" id="challengeEnd" type="date"/>
+        </div>
+        <button class="submit-btn" onclick="submitChallenge()">🏆 Bắt đầu thử thách</button>
+        <button class="danger-btn" id="challengeDeleteBtn" style="display:none" onclick="deleteChallenge()">🗑 Xoá</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CALENDAR OVERLAY ===== -->
+  <div class="modal-overlay" id="modal-calendar" onclick="closeModal('modal-calendar')">
+    <div class="modal-sheet" style="border-radius:28px 28px 0 0;" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <span class="nav-arrow" onclick="navCalendarMonth(-1)">‹</span>
+        <div style="flex:1;text-align:center;font-size:16px;font-weight:800;color:var(--gray-900);" id="calendarTitle">—</div>
+        <span class="nav-arrow" onclick="navCalendarMonth(1)">›</span>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+  </div>
+
+  <!-- ===== PROFILE MODAL ===== -->
+  <div class="modal-overlay" id="modal-profile" onclick="closeModal('modal-profile')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Thông tin tài khoản</div>
+      <div class="add-tx-form">
+        <div class="form-group">
+          <div class="form-label">Tên của bạn</div>
+          <input class="form-input" id="profileNameInput" placeholder="Nhập tên..."/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Mã ví cá nhân</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input class="form-input" id="profileCodeDisplay" readonly style="flex:1;color:var(--teal-dark);font-weight:700;font-size:18px;letter-spacing:2px;cursor:default;"/>
+            <button onclick="copyUserCode()" style="padding:10px 14px;background:var(--teal-light);border:1.5px solid var(--teal);border-radius:var(--radius-sm);font-size:13px;font-weight:700;color:var(--teal-dark);cursor:pointer;white-space:nowrap;">Sao chép</button>
+          </div>
+          <div style="font-size:11px;color:var(--gray-400);margin-top:4px;">Chia sẻ mã này để kết hợp ví với người thân trong tương lai</div>
+        </div>
+        <button class="submit-btn" onclick="submitProfile()">💾 Lưu</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 </div>
@@ -1438,7 +1671,14 @@ const SAVING_ICONS = ['🏖️','📱','🏠','🚗','💍','🎓','💻','✈�
 
 /* ---------- Lưu trữ ---------- */
 const STORE_KEY = 'moneybot_v1';
-let db = { wallets:[], transactions:[], budgets:[], savings:[], settings:{activeWalletId:null} };
+let db = { wallets:[], transactions:[], budgets:[], savings:[], debts:[], challenges:[], profile:{name:'Người dùng', code:''}, settings:{activeWalletId:null} };
+
+// Tạo mã ví ngắn gọn: VD HNG-4821
+function genUserCode(name){
+  const prefix = (name||'MB').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3).padEnd(3,'X');
+  const num = Math.floor(1000 + Math.random()*9000);
+  return prefix + '-' + num;
+}
 
 function loadDB(){
   try { const r = localStorage.getItem(STORE_KEY); if (r) db = JSON.parse(r); } catch(e){}
@@ -1446,7 +1686,12 @@ function loadDB(){
   db.transactions = db.transactions || [];
   db.budgets = db.budgets || [];
   db.savings = db.savings || [];
+  db.debts = db.debts || [];
+  db.challenges = db.challenges || [];
+  db.profile = db.profile || {name:'Người dùng', code:''};
   db.settings = db.settings || {};
+  // Tự tạo mã ví nếu chưa có
+  if (!db.profile.code) db.profile.code = genUserCode(db.profile.name);
   if (db.wallets.length === 0) {
     const w = { id: uid(), name:'Ví của tôi', icon:'💼', currency:'VND', initialBalance:0 };
     db.wallets.push(w);
@@ -1465,7 +1710,10 @@ let currentPeriod = 'month';
 let anchor = new Date();
 let homeTab = 'expense';
 let editingTxId = null, editingWalletId = null, editingBudgetId = null, editingSavingId = null, addMoneyId = null;
+let editingDebtId = null, editingChallengeId = null, debtTab = 'lend';
 let formType = 'expense', formCat = null, walletIconSel = '💼', savingIconSel = '🏖️';
+let debtFormType = 'lend';
+let calAnchor = new Date(); // Anchor cho calendar
 
 /* ---------- Tiện ích ---------- */
 function pad(n){ return n < 10 ? '0'+n : ''+n; }
@@ -1532,14 +1780,32 @@ function txInPeriod(walletId){
   const r = periodRange();
   const wid = walletId || null; // null = tất cả ví
   return db.transactions.filter(t =>
-    (wid ? t.walletId === wid : true)
+    t.type !== 'transfer'                            // loại trừ chuyển khoản khỏi thu/chi
+    && (wid ? t.walletId === wid : true)
     && pd(t.date) >= r.start && pd(t.date) < r.end
   );
+}
+function txInPeriodAll(walletId){  // Bao gồm cả transfer (cho màn Giao dịch)
+  const r = periodRange();
+  const wid = walletId || null;
+  return db.transactions.filter(t => {
+    if (wid) {
+      return (t.walletId === wid || t.toWalletId === wid) && pd(t.date) >= r.start && pd(t.date) < r.end;
+    }
+    return pd(t.date) >= r.start && pd(t.date) < r.end;
+  });
 }
 function walletBalance(wid){
   const w = db.wallets.find(x => x.id === wid); if (!w) return 0;
   let bal = Number(w.initialBalance) || 0;
-  db.transactions.filter(t => t.walletId === wid).forEach(t => { bal += t.type === 'income' ? t.amount : -t.amount; });
+  db.transactions.forEach(t => {
+    if (t.type === 'income' && t.walletId === wid) bal += t.amount;
+    else if (t.type === 'expense' && t.walletId === wid) bal -= t.amount;
+    else if (t.type === 'transfer') {
+      if (t.walletId === wid) bal -= t.amount;       // ví nguồn
+      if (t.toWalletId === wid) bal += t.amount;    // ví đích
+    }
+  });
   return bal;
 }
 function totalBalance(){
@@ -1559,22 +1825,28 @@ function monthExpense(year, month, wid){
 
 /* ---------- Điều hướng màn hình ---------- */
 function switchScreen(name){
-  const toolScreens = ['budget','savings','ai','chat'];
+  const toolScreens = ['budget','savings','ai','debt','challenge'];
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
+  const screenEl = document.getElementById('screen-' + name);
+  if (screenEl) screenEl.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const navEl = document.getElementById('nav-' + (toolScreens.includes(name) ? 'tools' : name));
   if (navEl) navEl.classList.add('active');
   currentScreen = name;
   const fab = document.getElementById('fabBtn');
-  fab.style.display = (name === 'home' || name === 'transactions') ? 'flex' : 'none';
+  const fabScreens = ['home','transactions','debt','challenge'];
+  fab.style.display = fabScreens.includes(name) ? 'flex' : 'none';
+  // FAB action thay đổi theo màn hình
+  if (name === 'debt') fab.onclick = () => openDebtModal(null);
+  else if (name === 'challenge') fab.onclick = () => openChallengeModal(null);
+  else fab.onclick = null; // dùng drag handler
   renderAll();
 }
 function openTool(name){
   if (name === 'budget') switchScreen('budget');
   else if (name === 'savings') switchScreen('savings');
-  else if (name === 'debt') showToast('Mẹo: dùng mục Tiết kiệm với mục tiêu "trả nợ" 😊');
-  else if (name === 'challenge') showToast('Tính năng Thử thách đang được phát triển!');
+  else if (name === 'debt') switchScreen('debt');
+  else if (name === 'challenge') switchScreen('challenge');
 }
 function openAIAnalysis(){ switchScreen('ai'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
@@ -1601,27 +1873,35 @@ function renderAll(){
   renderBudgets();
   renderSavings();
   renderInsights();
-  const chip = document.getElementById('chatWalletChip');
-  const w = activeWallet();
-  if (chip && w) chip.textContent = w.icon + ' ' + w.name;
+  renderDebtScreen();
+  renderChallengeScreen();
+  renderProfileUI();
 }
 
 function renderTotalAssets(){
-  // Tổng tài sản
   const total = totalBalance();
   const el = document.getElementById('totalAssetsAmount');
   if (el) el.textContent = fmtSigned(total);
 
-  // Danh sách ví dạng chip
+  // Wallet grid 2 cột — rõ ràng từng ví
   const row = document.getElementById('walletChipsRow');
   if (!row) return;
-  row.innerHTML = db.wallets.map(w => {
+  let html = '<div class="wallet-grid">';
+  db.wallets.forEach(w => {
     const bal = walletBalance(w.id);
-    return '<button class="wallet-chip-btn" onclick="openWalletModal(\'' + w.id + '\')">'
-      + (w.icon || '💼') + ' ' + esc(w.name)
-      + ' <span style="opacity:0.75;font-size:11px;margin-left:4px;">' + fmtSigned(bal, w.currency) + '</span>'
-      + '</button>';
-  }).join('') + '<button class="wallet-chip-btn add-chip" onclick="openWalletModal(null)">+ Thêm ví</button>';
+    const balColor = bal < 0 ? 'rgba(255,150,150,1)' : '#fff';
+    html += '<div class="wallet-grid-card" onclick="openWalletModal(\'' + w.id + '\')">'
+      + '<div class="wgc-icon">' + (w.icon||'💼') + '</div>'
+      + '<div class="wgc-name">' + esc(w.name) + '</div>'
+      + '<div class="wgc-bal" style="color:' + balColor + '">' + fmtSigned(bal, w.currency) + '</div>'
+      + '</div>';
+  });
+  html += '<div class="wallet-grid-card add-card" onclick="openWalletModal(null)">'
+    + '<div class="wgc-add-icon">＋</div>'
+    + '<div class="wgc-add-label">Thêm ví</div>'
+    + '</div>';
+  html += '</div>';
+  row.innerHTML = html;
 }
 
 function renderSummary(){
@@ -1686,7 +1966,7 @@ function renderTransactions(){
 
   const q = (document.getElementById('txSearch') ? document.getElementById('txSearch').value : '').trim().toLowerCase();
   const filterWid = txWalletFilter === 'all' ? null : txWalletFilter;
-  let txs = txInPeriod(filterWid);
+  let txs = txInPeriodAll(filterWid); // bao gồm cả transfer
   if (q) txs = txs.filter(t => (t.note||'').toLowerCase().includes(q) || (t.category||'').toLowerCase().includes(q));
   let exp = 0, inc = 0;
   txs.forEach(t => { if (t.type === 'income') inc += t.amount; else exp += t.amount; });
@@ -1709,6 +1989,17 @@ function renderTransactions(){
     html += '<div class="tx-group"><div class="tx-date-header"><span>' + fmtDateHeader(d) + '</span>'
       + '<span style="color:' + (dnet >= 0 ? 'var(--teal)' : 'var(--pink)') + '">' + fmtSigned(dnet) + '</span></div>';
     groups[d].forEach(t => {
+      if (t.type === 'transfer') {
+        const wFrom = db.wallets.find(w => w.id === t.walletId);
+        const wTo = db.wallets.find(w => w.id === t.toWalletId);
+        html += '<div class="tx-item" onclick="openTransferDetail(\'' + t.id + '\')">'
+          + '<div class="tx-icon" style="background:#EDE9FE">⇄</div>'
+          + '<div class="tx-info"><div class="tx-cat">Chuyển khoản</div>'
+          + '<div class="tx-note">' + (wFrom?wFrom.icon+' '+esc(wFrom.name):'?') + ' → ' + (wTo?wTo.icon+' '+esc(wTo.name):'?') + '</div>'
+          + (t.note ? '<div class="tx-note">' + esc(t.note) + '</div>' : '') + '</div>'
+          + '<div class="tx-amount transfer">⇄ ' + fmt(t.amount) + '</div></div>';
+        return;
+      }
       const m = catMeta(t.category, t.type);
       const tw = db.wallets.find(w => w.id === t.walletId);
       const walletTag = db.wallets.length > 1
@@ -2169,6 +2460,311 @@ function showToast(msg){
   t.classList.add('show');
   clearTimeout(window._toastTimer);
   window._toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+/* ============================================================
+   PROFILE (1.4)
+   ============================================================ */
+function renderProfileUI(){
+  const p = db.profile;
+  const nameEl = document.getElementById('profileName');
+  const codeEl = document.getElementById('profileCode');
+  const avEl   = document.getElementById('profileAvatar');
+  if (nameEl) nameEl.textContent = p.name || 'Người dùng';
+  if (codeEl) codeEl.textContent = 'Mã ví: ' + (p.code || '---');
+  if (avEl) avEl.textContent = (p.name||'N')[0].toUpperCase();
+}
+function openProfileModal(){
+  const p = db.profile;
+  document.getElementById('profileNameInput').value = p.name || '';
+  document.getElementById('profileCodeDisplay').value = p.code || '';
+  openModal('modal-profile');
+}
+function submitProfile(){
+  const name = document.getElementById('profileNameInput').value.trim() || 'Người dùng';
+  db.profile.name = name;
+  if (!db.profile.code) db.profile.code = genUserCode(name);
+  saveDB(); closeModal('modal-profile'); renderProfileUI();
+  showToast('✓ Đã lưu thông tin');
+}
+function copyUserCode(){
+  const code = db.profile.code;
+  if (navigator.clipboard) navigator.clipboard.writeText(code).then(()=>showToast('✓ Đã sao chép mã ' + code));
+  else showToast('Mã ví: ' + code);
+}
+
+/* ============================================================
+   CHUYỂN KHOẢN giữa ví (2.1 / 2.2)
+   ============================================================ */
+function openTransferModal(){
+  if (db.wallets.length < 2) { showToast('Cần ít nhất 2 ví để chuyển khoản'); return; }
+  const fromSel = document.getElementById('transferFrom');
+  const toSel   = document.getElementById('transferTo');
+  fromSel.innerHTML = db.wallets.map(w => '<option value="'+w.id+'">'+esc(w.icon+' '+w.name)+'</option>').join('');
+  toSel.innerHTML   = db.wallets.map(w => '<option value="'+w.id+'">'+esc(w.icon+' '+w.name)+'</option>').join('');
+  // Mặc định: from = ví đầu, to = ví thứ 2
+  fromSel.selectedIndex = 0;
+  toSel.selectedIndex = 1;
+  document.getElementById('transferAmount').value = '';
+  document.getElementById('transferDate').value = todayStr();
+  document.getElementById('transferNote').value = '';
+  openModal('modal-transfer');
+}
+function submitTransfer(){
+  const fromId = document.getElementById('transferFrom').value;
+  const toId   = document.getElementById('transferTo').value;
+  if (fromId === toId) { showToast('Ví nguồn và ví đích không thể giống nhau!'); return; }
+  const rawAmt = document.getElementById('transferAmount').value.replace(/\./g,'').replace(/\D/g,'');
+  const amt = parseInt(rawAmt, 10);
+  if (!amt || amt <= 0) { showToast('Vui lòng nhập số tiền hợp lệ!'); return; }
+  const date = document.getElementById('transferDate').value || todayStr();
+  const note = document.getElementById('transferNote').value.trim();
+  db.transactions.push({ id:uid(), type:'transfer', walletId:fromId, toWalletId:toId, amount:amt, date, note, category:'Chuyển khoản' });
+  saveDB(); closeModal('modal-transfer'); renderAll();
+  const wFrom = db.wallets.find(w=>w.id===fromId);
+  const wTo   = db.wallets.find(w=>w.id===toId);
+  showToast('⇄ Đã chuyển ' + fmt(amt) + ' từ ' + (wFrom?wFrom.name:'?') + ' → ' + (wTo?wTo.name:'?'));
+}
+function openTransferDetail(id){
+  // Cho phép xoá giao dịch chuyển khoản
+  const t = db.transactions.find(x=>x.id===id);
+  if (!t) return;
+  const wFrom = db.wallets.find(w=>w.id===t.walletId);
+  const wTo   = db.wallets.find(w=>w.id===t.toWalletId);
+  if (confirm('Xoá giao dịch chuyển khoản\n' + (wFrom?wFrom.name:'?') + ' → ' + (wTo?wTo.name:'?') + '\n' + fmt(t.amount) + '?')) {
+    db.transactions = db.transactions.filter(x=>x.id!==id);
+    saveDB(); renderAll(); showToast('🗑 Đã xoá chuyển khoản');
+  }
+}
+
+/* ============================================================
+   MÓN NỢ (1.2)
+   ============================================================ */
+function setDebtTab(tab){
+  debtTab = tab;
+  document.getElementById('debtTabLend').className = 'debt-tab' + (tab==='lend'?' active':'');
+  document.getElementById('debtTabBorrow').className = 'debt-tab' + (tab==='borrow'?' active':'');
+  renderDebtScreen();
+}
+function setDebtType(type){
+  debtFormType = type;
+  document.getElementById('debtTypeLend').className = 'type-btn expense' + (type==='lend'?' active':'');
+  document.getElementById('debtTypeBorrow').className = 'type-btn income' + (type==='borrow'?' active':'');
+}
+function renderDebtScreen(){
+  const el = document.getElementById('debtList'); if (!el) return;
+  const debts = db.debts.filter(d => d.type === debtTab);
+  if (debts.length === 0) {
+    const label = debtTab === 'lend' ? 'khoản cho vay' : 'khoản nợ';
+    el.innerHTML = '<div class="empty-state" style="padding-top:40px;"><div class="empty-emoji">🤝</div><p>Chưa có ' + label + ' nào</p><p class="hint">Nhấn + để thêm</p></div>';
+    return;
+  }
+  el.innerHTML = debts.map(d => {
+    const remaining = Math.max(0, d.amount - (d.paid||0));
+    const pct = d.amount > 0 ? Math.min(100, Math.round((d.paid||0)/d.amount*100)) : 0;
+    const settled = remaining === 0;
+    const dueStr = d.due ? (' · Hạn: ' + pd(d.due).getDate()+'/'+(pd(d.due).getMonth()+1)+'/'+pd(d.due).getFullYear()) : '';
+    return '<div class="debt-item">'
+      + '<div class="debt-edit-btn" onclick="openDebtModal(\'' + d.id + '\')">✏️</div>'
+      + '<div class="debt-header">'
+      + '<div class="debt-person">' + (d.type==='lend'?'💸 ':'📥 ') + esc(d.person) + '</div>'
+      + '<div class="debt-type-badge ' + d.type + '">' + (d.type==='lend'?'Cho vay':'Đang nợ') + (settled?' ✓':'') + '</div>'
+      + '</div>'
+      + '<div class="debt-amounts">'
+      + '<div class="debt-total">Gốc: ' + fmt(d.amount) + ' · Đã ' + (d.type==='lend'?'thu':'trả') + ': ' + fmt(d.paid||0) + dueStr + '</div>'
+      + '<div class="debt-remaining ' + d.type + '">' + (settled ? '✅ Đã tất toán' : fmt(remaining) + ' còn lại') + '</div>'
+      + '</div>'
+      + '<div class="debt-bar-bg"><div class="debt-bar ' + (d.type==='borrow'?'borrow':'') + '" style="width:' + pct + '%"></div></div>'
+      + '<div class="debt-footer"><span>' + pct + '% hoàn thành</span><span style="color:var(--gray-400);font-size:11px;">' + (d.note?esc(d.note):'') + '</span></div>'
+      + '</div>';
+  }).join('');
+}
+function openDebtModal(id){
+  editingDebtId = id || null;
+  if (id) {
+    const d = db.debts.find(x=>x.id===id);
+    debtFormType = d.type;
+    document.getElementById('debtPerson').value = d.person;
+    document.getElementById('debtAmount').value = fmtVND(d.amount);
+    document.getElementById('debtPaid').value = fmtVND(d.paid||0);
+    document.getElementById('debtDate').value = d.date || todayStr();
+    document.getElementById('debtDue').value = d.due || '';
+    document.getElementById('debtNote').value = d.note || '';
+    document.getElementById('debtModalTitle').textContent = 'Sửa khoản nợ';
+    document.getElementById('debtDeleteBtn').style.display = 'block';
+  } else {
+    debtFormType = debtTab;
+    document.getElementById('debtPerson').value = '';
+    document.getElementById('debtAmount').value = '';
+    document.getElementById('debtPaid').value = '';
+    document.getElementById('debtDate').value = todayStr();
+    document.getElementById('debtDue').value = '';
+    document.getElementById('debtNote').value = '';
+    document.getElementById('debtModalTitle').textContent = 'Thêm khoản nợ';
+    document.getElementById('debtDeleteBtn').style.display = 'none';
+  }
+  setDebtType(debtFormType);
+  openModal('modal-debt');
+}
+function submitDebt(){
+  const person = document.getElementById('debtPerson').value.trim();
+  if (!person) { showToast('Vui lòng nhập tên người!'); return; }
+  const rawAmt = document.getElementById('debtAmount').value.replace(/\./g,'').replace(/\D/g,'');
+  const amount = parseInt(rawAmt, 10);
+  if (!amount || amount <= 0) { showToast('Vui lòng nhập số tiền!'); return; }
+  const rawPaid = document.getElementById('debtPaid').value.replace(/\./g,'').replace(/\D/g,'');
+  const paid = parseInt(rawPaid, 10) || 0;
+  const debt = { id: editingDebtId||uid(), type:debtFormType, person, amount, paid:Math.min(paid,amount), date:document.getElementById('debtDate').value||todayStr(), due:document.getElementById('debtDue').value||'', note:document.getElementById('debtNote').value.trim() };
+  if (editingDebtId) { const i = db.debts.findIndex(x=>x.id===editingDebtId); db.debts[i] = debt; }
+  else db.debts.push(debt);
+  debtTab = debtFormType;
+  saveDB(); closeModal('modal-debt'); renderDebtScreen(); renderAll();
+  showToast('💾 Đã lưu khoản ' + (debtFormType==='lend'?'cho vay':'nợ'));
+}
+function deleteDebt(){
+  if (!editingDebtId) return;
+  db.debts = db.debts.filter(d=>d.id!==editingDebtId);
+  saveDB(); closeModal('modal-debt'); renderDebtScreen(); showToast('🗑 Đã xoá');
+}
+
+/* ============================================================
+   THỬ THÁCH (1.2)
+   ============================================================ */
+function renderChallengeScreen(){
+  const el = document.getElementById('challengeList'); if (!el) return;
+  if (db.challenges.length === 0) {
+    el.innerHTML = '<div class="empty-state" style="padding-top:40px;"><div class="empty-emoji">🏆</div><p>Chưa có thử thách nào</p><p class="hint">Đặt giới hạn chi tiêu và thử sức!</p></div>';
+    return;
+  }
+  const today = todayStr();
+  el.innerHTML = db.challenges.map(c => {
+    const start = pd(c.startDate), end = pd(c.endDate);
+    const now = new Date();
+    const isOngoing = now >= start && now <= end;
+    const isPast = now > end;
+    // Tính chi tiêu trong kỳ
+    const spent = db.transactions.filter(t => {
+      if (t.type==='transfer' || t.type==='income') return false;
+      if (c.category && t.category !== c.category) return false;
+      const d = pd(t.date);
+      return d >= start && d <= end;
+    }).reduce((s,t) => s+t.amount, 0);
+    const pct = c.limit > 0 ? Math.min(100, Math.round(spent/c.limit*100)) : 0;
+    const over = spent > c.limit;
+    let statusLabel, statusClass;
+    if (isOngoing) { statusLabel = '⏳ Đang chạy'; statusClass = 'ongoing'; }
+    else if (isPast && !over) { statusLabel = '✅ Vượt thách'; statusClass = 'pass'; }
+    else if (isPast && over) { statusLabel = '❌ Không đạt'; statusClass = 'fail'; }
+    else { statusLabel = '🔜 Sắp bắt đầu'; statusClass = 'ongoing'; }
+    const daysLeft = isOngoing ? Math.ceil((end-now)/(86400000)) : 0;
+    return '<div class="challenge-item">'
+      + '<div class="challenge-edit-btn" onclick="openChallengeModal(\'' + c.id + '\')">✏️</div>'
+      + '<div class="challenge-header">'
+      + '<div class="challenge-name">' + esc(c.name) + '</div>'
+      + '<div class="challenge-status ' + statusClass + '">' + statusLabel + '</div>'
+      + '</div>'
+      + '<div class="challenge-amounts">Đã chi: <strong>' + fmt(spent) + '</strong> / ' + fmt(c.limit) + (c.category?' · '+esc(c.category):' · Tất cả') + '</div>'
+      + '<div class="challenge-bar-bg"><div class="challenge-bar' + (over?' danger':'') + '" style="width:' + pct + '%"></div></div>'
+      + '<div class="challenge-footer"><span>' + pct + '% đã dùng</span><span>' + (isOngoing ? 'Còn ' + daysLeft + ' ngày' : (c.startDate+' → '+c.endDate)) + '</span></div>'
+      + '</div>';
+  }).join('');
+}
+function openChallengeModal(id){
+  editingChallengeId = id || null;
+  const sel = document.getElementById('challengeCategory');
+  sel.innerHTML = '<option value="">Tất cả danh mục</option>'
+    + EXPENSE_CATS.map(c => '<option value="'+esc(c.name)+'">'+c.icon+' '+esc(c.name)+'</option>').join('');
+  if (id) {
+    const c = db.challenges.find(x=>x.id===id);
+    document.getElementById('challengeName').value = c.name;
+    sel.value = c.category || '';
+    document.getElementById('challengeLimit').value = fmtVND(c.limit);
+    document.getElementById('challengeStart').value = c.startDate;
+    document.getElementById('challengeEnd').value = c.endDate;
+    document.getElementById('challengeModalTitle').textContent = 'Sửa thử thách';
+    document.getElementById('challengeDeleteBtn').style.display = 'block';
+  } else {
+    document.getElementById('challengeName').value = '';
+    sel.value = '';
+    document.getElementById('challengeLimit').value = '';
+    document.getElementById('challengeStart').value = todayStr();
+    const end = new Date(); end.setDate(end.getDate()+7);
+    document.getElementById('challengeEnd').value = end.toISOString().split('T')[0];
+    document.getElementById('challengeModalTitle').textContent = 'Tạo thử thách';
+    document.getElementById('challengeDeleteBtn').style.display = 'none';
+  }
+  openModal('modal-challenge');
+}
+function submitChallenge(){
+  const name = document.getElementById('challengeName').value.trim();
+  if (!name) { showToast('Vui lòng nhập tên thử thách!'); return; }
+  const rawLmt = document.getElementById('challengeLimit').value.replace(/\./g,'').replace(/\D/g,'');
+  const limit = parseInt(rawLmt, 10);
+  if (!limit || limit <= 0) { showToast('Vui lòng nhập ngân sách tối đa!'); return; }
+  const startDate = document.getElementById('challengeStart').value;
+  const endDate   = document.getElementById('challengeEnd').value;
+  if (!startDate || !endDate || startDate > endDate) { showToast('Ngày không hợp lệ!'); return; }
+  const ch = { id:editingChallengeId||uid(), name, category:document.getElementById('challengeCategory').value, limit, startDate, endDate };
+  if (editingChallengeId) { const i = db.challenges.findIndex(x=>x.id===editingChallengeId); db.challenges[i] = ch; }
+  else db.challenges.push(ch);
+  saveDB(); closeModal('modal-challenge'); renderChallengeScreen();
+  showToast('🏆 Đã tạo thử thách!');
+}
+function deleteChallenge(){
+  if (!editingChallengeId) return;
+  db.challenges = db.challenges.filter(c=>c.id!==editingChallengeId);
+  saveDB(); closeModal('modal-challenge'); renderChallengeScreen(); showToast('🗑 Đã xoá thử thách');
+}
+
+/* ============================================================
+   LỊCH CHI TIÊU (1.7)
+   ============================================================ */
+function openCalendar(){
+  calAnchor = new Date(anchor); // dùng anchor hiện tại
+  renderCalendar();
+  openModal('modal-calendar');
+}
+function navCalendarMonth(dir){
+  calAnchor = new Date(calAnchor);
+  calAnchor.setMonth(calAnchor.getMonth() + dir);
+  renderCalendar();
+}
+function renderCalendar(){
+  const y = calAnchor.getFullYear(), mo = calAnchor.getMonth();
+  document.getElementById('calendarTitle').textContent = 'Tháng ' + (mo+1) + ' / ' + y;
+  // Gom thu/chi theo ngày trong tháng
+  const start = new Date(y, mo, 1), end = new Date(y, mo+1, 1);
+  const dayMap = {};
+  db.transactions.forEach(t => {
+    if (t.type === 'transfer') return;
+    const d = pd(t.date);
+    if (d < start || d >= end) return;
+    const key = t.date;
+    if (!dayMap[key]) dayMap[key] = 0;
+    dayMap[key] += t.type === 'income' ? t.amount : -t.amount;
+  });
+  const today = todayStr();
+  const firstDow = (new Date(y, mo, 1).getDay() + 6) % 7; // Mon=0
+  const daysInMonth = new Date(y, mo+1, 0).getDate();
+  const DOWS = ['T2','T3','T4','T5','T6','T7','CN'];
+  let html = DOWS.map(d => '<div class="cal-dow">' + d + '</div>').join('');
+  // Ô trống đầu tháng
+  for (let i=0; i<firstDow; i++) html += '<div class="cal-day empty"></div>';
+  for (let day=1; day<=daysInMonth; day++) {
+    const ds = y + '-' + pad(mo+1) + '-' + pad(day);
+    const net = dayMap[ds] || 0;
+    const isToday = ds === today;
+    let amtHtml = '';
+    if (net !== 0) {
+      amtHtml = '<div class="cal-amount ' + (net>=0?'pos':'neg') + '">'
+        + (net >= 0 ? '+' : '') + fmtShort(net) + '</div>';
+    }
+    html += '<div class="cal-day' + (isToday?' today':'') + '">'
+      + '<div class="cal-day-num">' + day + '</div>'
+      + amtHtml
+      + '</div>';
+  }
+  document.getElementById('calendarGrid').innerHTML = html;
 }
 
 /* ---------- Khởi động ---------- */

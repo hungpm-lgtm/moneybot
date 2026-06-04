@@ -8,70 +8,53 @@
 <meta name="theme-color" content="#3D7D78">
 <title>Ghi nhanh</title>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
-<!-- Firebase SDK (compat) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <style>
 :root {
-  --teal:      #5EA09B;
+  --teal: #5EA09B;
   --teal-dark: #3D7D78;
   --teal-lite: #E4F3F2;
-  --cream:     #EDE7DC;
-  --white:     #FFFFFF;
-  --pink:      #E4969E;
-  --gray:      #787068;
+  --cream: #EDE7DC;
+  --white: #FFFFFF;
+  --pink: #E4969E;
+  --gray: #787068;
   --gray-lite: #F0EBE3;
-  --text:      #282018;
+  --text: #282018;
   --font: 'Be Vietnam Pro', sans-serif;
-  --r: 16px;
+  --r: 14px;
 }
-
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-
 body {
-  font-family: var(--font);
-  background: var(--cream);
-  min-height: 100dvh;
-  display: flex; flex-direction: column;
-  position: fixed; inset: 0;
-  overflow: hidden;
+  font-family: var(--font); background: var(--cream);
+  min-height: 100dvh; display: flex; flex-direction: column;
+  position: fixed; inset: 0; overflow: hidden;
 }
 
 /* ── Header ── */
 .header {
   background: linear-gradient(150deg, #3D7D78 0%, #5EA09B 100%);
-  padding: env(safe-area-inset-top, 12px) 20px 14px;
-  padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 10px);
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px 12px;
   display: flex; align-items: center; justify-content: space-between;
   position: relative; overflow: hidden; flex-shrink: 0;
 }
 .header::before {
-  content:''; position:absolute; width:160px; height:160px;
+  content:''; position:absolute; width:140px; height:140px;
   background:rgba(255,255,255,0.08); border-radius:50%;
-  top:-70px; right:-40px;
+  top:-60px; right:-30px;
 }
-.header-left { display:flex; align-items:center; gap:10px; position:relative; z-index:1; }
-.header-icon {
-  width:40px; height:40px; background:rgba(255,255,255,0.2);
-  border-radius:12px; display:flex; align-items:center; justify-content:center;
-  font-size:20px;
-}
-.header-title { font-size:16px; font-weight:800; color:#fff; line-height:1.2; }
-.header-wallet { font-size:11px; color:rgba(255,255,255,0.7); font-weight:600; margin-top:1px; }
-.open-app-btn {
-  position:relative; z-index:1;
-  background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.3);
-  color:#fff; font-family:var(--font); font-size:12px; font-weight:700;
-  padding:6px 14px; border-radius:20px; text-decoration:none;
-  backdrop-filter:blur(8px);
-}
+.header-left { display:flex; align-items:center; gap:8px; position:relative; z-index:1; }
+.header-icon { width:34px; height:34px; background:rgba(255,255,255,0.20); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.header-title { font-size:15px; font-weight:800; color:#fff; line-height:1.1; }
+.header-sub { font-size:10px; color:rgba(255,255,255,0.7); margin-top:1px; }
+.header-right { display:flex; align-items:center; gap:6px; position:relative; z-index:1; }
 .sync-badge {
-  position:relative; z-index:1; display:flex; align-items:center; gap:5px;
-  background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.3);
-  color:#fff; font-size:11px; font-weight:600;
-  padding:4px 10px; border-radius:20px;
-  backdrop-filter:blur(8px); margin-right:6px;
+  display:flex; align-items:center; gap:4px;
+  background:rgba(255,255,255,0.16); border:1px solid rgba(255,255,255,0.25);
+  color:#fff; font-size:10px; font-weight:600;
+  padding:4px 8px; border-radius:14px;
 }
 .sync-dot { width:6px; height:6px; border-radius:50%; }
 .sync-dot.synced { background:#22C55E; }
@@ -79,6 +62,116 @@ body {
 .sync-dot.error { background:#E4969E; }
 .sync-dot.offline { background:#9CA3AF; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.open-app-btn, .save-corner {
+  background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.3);
+  color:#fff; font-family:var(--font); font-size:11px; font-weight:700;
+  padding:5px 10px; border-radius:14px; text-decoration:none;
+  backdrop-filter:blur(8px); cursor:pointer;
+}
+.save-corner { background:#fff; color:var(--teal-dark); border-color:#fff; }
+.save-corner:disabled { opacity:0.5; cursor:not-allowed; }
+
+/* ── Content (no scroll, fit screen) ── */
+.content {
+  flex:1; padding:10px 14px 12px;
+  display:flex; flex-direction:column; gap:10px;
+  overflow-y:auto; scrollbar-width:none;
+}
+.content::-webkit-scrollbar { display:none; }
+.section-label {
+  font-size:9px; font-weight:800; color:var(--gray);
+  letter-spacing:0.6px; text-transform:uppercase; margin-bottom:5px;
+}
+
+/* ── Wallet chips ── */
+.wallet-row { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; }
+.wallet-row::-webkit-scrollbar { display:none; }
+.w-chip {
+  flex-shrink:0; padding:8px 12px; border-radius:12px;
+  background:var(--white); border:2px solid transparent;
+  display:flex; align-items:center; gap:6px; cursor:pointer;
+  box-shadow:0 1px 6px rgba(80,65,50,0.06); transition:all 0.15s;
+}
+.w-chip:active { transform:scale(0.96); }
+.w-chip.selected { border-color:var(--teal); background:var(--teal-lite); }
+.w-chip-icon { font-size:16px; }
+.w-chip-info { display:flex; flex-direction:column; line-height:1.1; }
+.w-chip-name { font-size:11px; font-weight:700; color:var(--text); white-space:nowrap; max-width:90px; overflow:hidden; text-overflow:ellipsis; }
+.w-chip-bal { font-size:10px; font-weight:600; color:var(--gray); margin-top:1px; }
+
+/* ── Category grid (4 cols, compact) ── */
+.cat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+.cat-btn {
+  background:var(--white); border:2px solid transparent;
+  border-radius:12px; padding:8px 4px;
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  cursor:pointer; transition:all 0.15s; box-shadow:0 1px 6px rgba(80,65,50,0.06);
+  user-select:none;
+}
+.cat-btn:active { transform:scale(0.95); }
+.cat-btn.selected { background:var(--teal-lite); border-color:var(--teal); }
+.cat-btn .icon { font-size:20px; }
+.cat-btn .name {
+  font-size:9px; font-weight:700; color:var(--gray);
+  text-align:center; line-height:1.15;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;
+}
+.cat-btn.selected .name { color:var(--teal-dark); }
+
+/* ── Amount input ── */
+.amount-wrap { background:var(--white); border-radius:var(--r); padding:10px 14px; box-shadow:0 1px 6px rgba(80,65,50,0.06); }
+.amount-input {
+  width:100%; border:none; outline:none;
+  font-family:var(--font); font-size:24px; font-weight:800;
+  color:var(--text); text-align:right; background:transparent;
+  letter-spacing:-0.5px;
+}
+.amount-suffix {
+  font-size:12px; color:var(--gray); font-weight:700;
+  text-align:right; margin-top:-4px;
+}
+.quick-amts { display:flex; gap:5px; margin-top:8px; flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; }
+.quick-amts::-webkit-scrollbar { display:none; }
+.qa-btn {
+  flex:1; min-width:48px; padding:7px 0;
+  background:var(--gray-lite); border:1.5px solid transparent;
+  border-radius:10px; font-family:var(--font); font-size:11px;
+  font-weight:700; color:var(--gray); cursor:pointer;
+  transition:all 0.15s; white-space:nowrap;
+}
+.qa-btn:active { transform:scale(0.94); background:var(--teal-lite); border-color:var(--teal); color:var(--teal-dark); }
+
+/* ── Note ── */
+.note-input {
+  width:100%; padding:9px 12px; background:var(--white);
+  border:2px solid transparent; border-radius:var(--r);
+  font-family:var(--font); font-size:13px; color:var(--text);
+  outline:none; box-shadow:0 1px 6px rgba(80,65,50,0.06);
+}
+.note-input:focus { border-color:var(--teal); }
+.note-input::placeholder { color:#B0A898; }
+
+/* ── Autosave indicator ── */
+.auto-hint {
+  font-size:11px; color:var(--gray); text-align:center;
+  font-weight:600; padding:6px 8px;
+  background:rgba(94,160,155,0.10); border-radius:10px;
+}
+.auto-hint.ready { background:rgba(94,160,155,0.20); color:var(--teal-dark); }
+.auto-hint.saving { background:#FFF2D5; color:#C08000; }
+
+/* ── Success/Error overlay ── */
+.success-overlay {
+  position:fixed; inset:0; background:rgba(61,125,120,0.92);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  z-index:999; opacity:0; pointer-events:none; transition:opacity 0.2s;
+}
+.success-overlay.show { opacity:1; pointer-events:auto; }
+.success-check { font-size:64px; margin-bottom:8px; animation:pop 0.3s ease; }
+.success-text { font-size:16px; font-weight:800; color:#fff; }
+.success-sub { font-size:12px; color:rgba(255,255,255,0.85); font-weight:600; margin-top:4px; }
+@keyframes pop { from { transform:scale(0.5); opacity:0; } to { transform:scale(1); opacity:1; } }
+
 .loading-overlay {
   position:fixed; inset:0; background:rgba(237,231,220,0.95);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -86,215 +179,71 @@ body {
 }
 .loading-overlay.show { opacity:1; pointer-events:auto; }
 .spinner {
-  width:36px; height:36px; border:3px solid var(--teal-lite);
+  width:32px; height:32px; border:3px solid var(--teal-lite);
   border-top-color:var(--teal-dark); border-radius:50%;
-  animation:spin 0.7s linear infinite; margin-bottom:10px;
+  animation:spin 0.7s linear infinite; margin-bottom:8px;
 }
 @keyframes spin { to { transform:rotate(360deg); } }
-
-/* ── Scroll content ── */
-.content {
-  flex:1; overflow-y:auto; padding:16px 16px 0;
-  display:flex; flex-direction:column; gap:14px;
-  scrollbar-width:none;
-}
-.content::-webkit-scrollbar { display:none; }
-
-/* ── Section label ── */
-.section-label {
-  font-size:10px; font-weight:700; color:var(--gray);
-  letter-spacing:0.8px; text-transform:uppercase; margin-bottom:8px;
-}
-
-/* ── Category grid ── */
-.cat-grid {
-  display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
-}
-.cat-btn {
-  background:var(--white); border:2px solid transparent;
-  border-radius:var(--r); padding:10px 6px;
-  display:flex; flex-direction:column; align-items:center; gap:4px;
-  cursor:pointer; transition:all 0.15s; box-shadow:0 2px 8px rgba(80,65,50,0.07);
-  user-select:none;
-}
-.cat-btn:active { transform:scale(0.96); }
-.cat-btn.selected {
-  background:var(--teal-lite); border-color:var(--teal);
-}
-.cat-btn .icon { font-size:22px; }
-.cat-btn .name {
-  font-size:10px; font-weight:700; color:var(--gray);
-  text-align:center; line-height:1.2;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;
-}
-.cat-btn.selected .name { color:var(--teal-dark); }
-
-/* ── Amount grid ── */
-.amount-grid {
-  display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
-}
-.amt-btn {
-  background:var(--white); border:2px solid transparent;
-  border-radius:var(--r); padding:14px 6px;
-  display:flex; align-items:center; justify-content:center;
-  font-family:var(--font); font-size:15px; font-weight:800; color:var(--text);
-  cursor:pointer; transition:all 0.15s; box-shadow:0 2px 8px rgba(80,65,50,0.07);
-  user-select:none;
-}
-.amt-btn:active { transform:scale(0.96); }
-.amt-btn.selected {
-  background:var(--teal-dark); border-color:var(--teal-dark); color:#fff;
-}
-.custom-amt-row {
-  display:flex; gap:8px; align-items:center; margin-top:4px;
-}
-.custom-input {
-  flex:1; padding:12px 14px; background:var(--white);
-  border:2px solid var(--gray-lite); border-radius:var(--r);
-  font-family:var(--font); font-size:15px; font-weight:700; color:var(--text);
-  outline:none; text-align:right;
-}
-.custom-input:focus { border-color:var(--teal); }
-.custom-input::placeholder { color:#C0B8A8; font-weight:400; }
-
-/* ── Note input ── */
-.note-input {
-  width:100%; padding:12px 14px; background:var(--white);
-  border:2px solid transparent; border-radius:var(--r);
-  font-family:var(--font); font-size:14px; color:var(--text);
-  outline:none;
-}
-.note-input:focus { border-color:var(--teal); }
-.note-input::placeholder { color:#B0A898; }
-
-/* ── Save button ── */
-.save-btn {
-  width:100%; padding:16px;
-  background:linear-gradient(135deg, #60AAA5 0%, #3D7D78 100%);
-  color:#fff; border:none; border-radius:var(--r);
-  font-family:var(--font); font-size:16px; font-weight:800;
-  cursor:pointer; transition:all 0.15s;
-  box-shadow:0 4px 16px rgba(61,125,120,0.35);
-  display:flex; align-items:center; justify-content:center; gap:8px;
-}
-.save-btn:active { transform:scale(0.98); }
-.save-btn:disabled { background:#C0B8A8; box-shadow:none; cursor:not-allowed; }
-
-/* ── Preview bar ── */
-.preview-bar {
-  background:var(--white); border-radius:var(--r); padding:12px 16px;
-  display:flex; align-items:center; gap:10px;
-  box-shadow:0 2px 8px rgba(80,65,50,0.07); min-height:52px;
-}
-.preview-icon { font-size:24px; }
-.preview-text { flex:1; }
-.preview-cat { font-size:13px; font-weight:700; color:var(--gray); }
-.preview-amount { font-size:20px; font-weight:800; color:var(--teal-dark); margin-top:2px; }
-.preview-placeholder { font-size:13px; color:#B0A898; font-weight:500; }
-
-/* ── Recent list ── */
-.recent-item {
-  background:var(--white); border-radius:12px; padding:10px 14px;
-  display:flex; align-items:center; gap:10px;
-  box-shadow:0 1px 6px rgba(80,65,50,0.06);
-}
-.recent-icon { font-size:18px; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
-.recent-info { flex:1; }
-.recent-cat { font-size:12px; font-weight:700; color:var(--text); }
-.recent-note { font-size:11px; color:var(--gray); margin-top:1px; }
-.recent-amt { font-size:13px; font-weight:800; color:var(--pink); }
-.recent-time { font-size:10px; color:#B0A898; margin-top:2px; text-align:right; }
-
-/* ── Footer ── */
-.footer {
-  padding:12px 20px calc(env(safe-area-inset-bottom, 0px) + 12px);
-  text-align:center; flex-shrink:0;
-}
-.footer a { font-size:12px; color:var(--teal-dark); font-weight:600; text-decoration:none; }
-
-/* ── Success overlay ── */
-.success-overlay {
-  position:fixed; inset:0; background:rgba(61,125,120,0.92);
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  z-index:999; opacity:0; pointer-events:none; transition:opacity 0.2s;
-}
-.success-overlay.show { opacity:1; pointer-events:auto; }
-.success-check { font-size:64px; margin-bottom:12px; animation:pop 0.3s ease; }
-.success-text { font-size:18px; font-weight:800; color:#fff; margin-bottom:6px; }
-.success-sub { font-size:13px; color:rgba(255,255,255,0.8); font-weight:600; }
-
-@keyframes pop { from { transform:scale(0.5); opacity:0; } to { transform:scale(1); opacity:1; } }
 </style>
 </head>
 <body>
 
-<!-- Header -->
 <div class="header">
   <div class="header-left">
     <div class="header-icon">⚡</div>
     <div>
       <div class="header-title">Ghi nhanh</div>
-      <div class="header-wallet" id="walletLabel">💼 —</div>
+      <div class="header-sub" id="autoSub">Tự lưu khi đủ thông tin</div>
     </div>
   </div>
-  <div style="display:flex;align-items:center;">
+  <div class="header-right">
     <div class="sync-badge" id="syncBadge"><div class="sync-dot offline"></div><span>...</span></div>
-    <a href="rolly-finance-app.html" class="open-app-btn">App ↗</a>
+    <button class="save-corner" id="saveBtn" onclick="save()" disabled>✓ Lưu</button>
+    <a href="rolly-finance-app.html" class="open-app-btn">App↗</a>
   </div>
 </div>
 
-<!-- Loading overlay when pulling cloud data -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
-  <div style="font-size:13px;color:var(--gray);font-weight:600;">Đang đồng bộ từ cloud...</div>
+  <div style="font-size:12px;color:var(--gray);font-weight:600;">Đang đồng bộ...</div>
 </div>
 
-<!-- Scrollable content -->
 <div class="content">
 
-  <!-- Preview bar -->
-  <div class="preview-bar" id="previewBar">
-    <div class="preview-placeholder">Chọn danh mục và số tiền bên dưới...</div>
+  <!-- Ví -->
+  <div>
+    <div class="section-label">Ví trừ tiền</div>
+    <div class="wallet-row" id="walletRow"></div>
   </div>
 
-  <!-- Categories -->
+  <!-- Danh mục -->
   <div>
     <div class="section-label">Danh mục chi</div>
     <div class="cat-grid" id="catGrid"></div>
   </div>
 
-  <!-- Amounts -->
+  <!-- Số tiền -->
   <div>
-    <div class="section-label">Số tiền</div>
-    <div class="amount-grid" id="amountGrid"></div>
-    <div class="custom-amt-row" style="margin-top:8px;">
-      <input class="custom-input" id="customAmt" type="text" inputmode="numeric"
-        placeholder="Số tiền khác..." autocomplete="off"/>
+    <div class="section-label">Số tiền (₫)</div>
+    <div class="amount-wrap">
+      <input class="amount-input" id="amtInput" type="text" inputmode="numeric" placeholder="000" autocomplete="off" value="000"/>
+    </div>
+    <div class="quick-amts">
+      <button class="qa-btn" type="button" onclick="addAmt(10000)">+10k</button>
+      <button class="qa-btn" type="button" onclick="addAmt(20000)">+20k</button>
+      <button class="qa-btn" type="button" onclick="addAmt(50000)">+50k</button>
+      <button class="qa-btn" type="button" onclick="addAmt(100000)">+100k</button>
+      <button class="qa-btn" type="button" onclick="addAmt(500000)">+500k</button>
+      <button class="qa-btn" type="button" onclick="addAmt(1000000)">+1tr</button>
     </div>
   </div>
 
-  <!-- Note -->
-  <div>
-    <input class="note-input" id="noteInput" placeholder="✏️  Ghi chú (tùy chọn)..."/>
-  </div>
+  <!-- Ghi chú -->
+  <input class="note-input" id="noteInput" placeholder="✏️ Ghi chú (tùy chọn)"/>
 
-  <!-- Save -->
-  <button class="save-btn" id="saveBtn" onclick="save()" disabled>
-    <span>✓ Lưu ngay</span>
-  </button>
+  <!-- Auto-save indicator -->
+  <div class="auto-hint" id="autoHint">⌛ Chọn ví + danh mục + số tiền để tự lưu</div>
 
-  <!-- Recent -->
-  <div id="recentSection" style="display:none;">
-    <div class="section-label">Gần đây</div>
-    <div style="display:flex;flex-direction:column;gap:6px;" id="recentList"></div>
-  </div>
-
-  <div style="height:4px;"></div>
-</div>
-
-<!-- Footer -->
-<div class="footer">
-  <a href="rolly-finance-app.html">Xem đầy đủ lịch sử giao dịch →</a>
 </div>
 
 <!-- Success overlay -->
@@ -305,89 +254,95 @@ body {
 </div>
 
 <script>
-/* ── Hằng số ── */
 const STORE_KEY = 'moneybot_v1';
-const PRESET_AMTS = [30000, 50000, 100000, 200000];
 const DEFAULT_CATS = [
   {name:'Thức ăn & Đồ uống', icon:'🍽️', color:'#F472B6'},
   {name:'Giao thông', icon:'⛽', color:'#34D399'},
   {name:'Nhà', icon:'🏠', color:'#3B82F6'},
   {name:'Giải trí', icon:'🎮', color:'#FBBF24'},
   {name:'Mua sắm', icon:'🛍️', color:'#10B981'},
+  {name:'Quà tặng', icon:'🎁', color:'#A78BFA'},
+  {name:'Làm đẹp', icon:'💄', color:'#FB7185'},
+  {name:'Y tế', icon:'🏥', color:'#22D3EE'},
+  {name:'Học tập', icon:'📚', color:'#F59E0B'},
+  {name:'Hóa đơn', icon:'🧾', color:'#6366F1'},
   {name:'Khác', icon:'📦', color:'#9CA3AF'},
 ];
-
-/* ── Firebase Config (đồng bộ với app chính) ── */
 const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyBFC3zt8kEI6aDO6d4NZcIx7r8KqU6xBJc",
-  authDomain:        "moneybot-fd2e2.firebaseapp.com",
-  projectId:         "moneybot-fd2e2",
-  storageBucket:     "moneybot-fd2e2.firebasestorage.app",
+  apiKey: "AIzaSyBFC3zt8kEI6aDO6d4NZcIx7r8KqU6xBJc",
+  authDomain: "moneybot-fd2e2.firebaseapp.com",
+  projectId: "moneybot-fd2e2",
+  storageBucket: "moneybot-fd2e2.firebasestorage.app",
   messagingSenderId: "51757805010",
-  appId:             "1:51757805010:web:1c5087f0ad375c7ae5ec0b"
+  appId: "1:51757805010:web:1c5087f0ad375c7ae5ec0b"
 };
 
 let fbAuth = null, fbStore = null, fbUser = null;
-let _syncStatus = 'offline'; // offline | syncing | synced | error
-
-/* ── Trạng thái ── */
-let selCat = null;
-let selAmt = null;
-let customAmtValue = null;
+let _syncStatus = 'offline';
 let db = null;
+let selWalletId = null;
+let selCat = null, selCatIcon = '';
+let autoSaveTimer = null;
+let isSaving = false;
 
 /* ── Utils ── */
-function pad(n){ return n < 10 ? '0'+n : ''+n; }
-function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-function todayStr(){
-  const d = new Date();
-  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
-}
-function nowTimeStr(){
-  const d = new Date();
-  return pad(d.getHours())+':'+pad(d.getMinutes());
-}
-function fmtAmt(n){
-  return Math.round(Math.abs(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-}
+function pad(n){ return n<10?'0'+n:''+n; }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function nowTimeStr(){ const d=new Date(); return pad(d.getHours())+':'+pad(d.getMinutes()); }
+function fmtAmt(n){ return Math.round(Math.abs(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
 function fmtShort(n){
+  if (n >= 1e9) return (n/1e9).toFixed(1).replace(/\.0$/,'').replace('.',',')+'tỷ';
   if (n >= 1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'').replace('.',',')+'tr';
   if (n >= 1e3) return Math.round(n/1e3)+'k';
   return ''+n;
 }
+function walletBalance(wid){
+  const w = db.wallets.find(x=>x.id===wid); if (!w) return 0;
+  let bal = Number(w.initialBalance) || 0;
+  db.transactions.forEach(t => {
+    if (t.type==='income' && t.walletId===wid) bal += t.amount;
+    else if (t.type==='expense' && t.walletId===wid) bal -= t.amount;
+    else if (t.type==='transfer') {
+      if (t.walletId===wid) bal -= t.amount;
+      if (t.toWalletId===wid) bal += t.amount;
+    }
+  });
+  return bal;
+}
 
-/* ── Load data ── */
+/* ── Load/Save ── */
 function loadDB(){
-  try {
-    const raw = localStorage.getItem(STORE_KEY);
-    if (raw) db = JSON.parse(raw);
-  } catch(e){}
-  if (!db) db = { wallets:[], transactions:[], budgets:[], savings:[], debts:[], challenges:[], categories:{expense:DEFAULT_CATS,income:[]}, profile:{name:'Người dùng',code:''}, settings:{} };
+  try { const raw = localStorage.getItem(STORE_KEY); if (raw) db = JSON.parse(raw); } catch(e){}
+  if (!db) db = { wallets:[], transactions:[], categories:{expense:DEFAULT_CATS,income:[]}, settings:{} };
   db.wallets = db.wallets || [];
   db.transactions = db.transactions || [];
   db.categories = db.categories || {expense:DEFAULT_CATS, income:[]};
   if (!db.categories.expense || !db.categories.expense.length) db.categories.expense = DEFAULT_CATS;
-  if (db.wallets.length === 0){
+  if (db.wallets.length === 0) {
     const w = {id:'w1', name:'Ví của tôi', icon:'💼', currency:'VND', initialBalance:0};
-    db.wallets.push(w);
-    db.settings.activeWalletId = w.id;
+    db.wallets.push(w); db.settings.activeWalletId = w.id;
   }
+  selWalletId = db.settings.activeWalletId || db.wallets[0].id;
 }
+function saveDB(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(db)); } catch(e){} }
 
-function saveDB(){
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(db)); } catch(e){}
+/* ── Render ── */
+function renderWallets(){
+  const row = document.getElementById('walletRow');
+  row.innerHTML = db.wallets.map(w => {
+    const bal = walletBalance(w.id);
+    return `<div class="w-chip ${selWalletId===w.id?'selected':''}" onclick="selWallet('${w.id}')">
+      <span class="w-chip-icon">${w.icon||'💼'}</span>
+      <div class="w-chip-info">
+        <div class="w-chip-name">${w.name}</div>
+        <div class="w-chip-bal">${fmtShort(bal)} ₫</div>
+      </div>
+    </div>`;
+  }).join('');
 }
-
-/* ── Render wallet label ── */
-function renderWallet(){
-  const wid = db.settings.activeWalletId;
-  const w = db.wallets.find(x=>x.id===wid) || db.wallets[0];
-  if (w) document.getElementById('walletLabel').textContent = (w.icon||'💼') + ' ' + w.name;
-}
-
-/* ── Render categories ── */
 function renderCats(){
-  const cats = (db.categories.expense || DEFAULT_CATS).slice(0, 9); // max 9 (3x3 grid)
+  const cats = db.categories.expense || DEFAULT_CATS;
   const grid = document.getElementById('catGrid');
   grid.innerHTML = cats.map(c =>
     `<div class="cat-btn ${selCat===c.name?'selected':''}" onclick="selectCat('${encodeURIComponent(c.name)}','${encodeURIComponent(c.icon)}')">
@@ -396,178 +351,149 @@ function renderCats(){
     </div>`
   ).join('');
 }
-
-/* ── Render amounts ── */
-function renderAmts(){
-  const grid = document.getElementById('amountGrid');
-  grid.innerHTML = PRESET_AMTS.map(a =>
-    `<div class="amt-btn ${selAmt===a&&!customAmtValue?'selected':''}" onclick="selectAmt(${a})">
-      ${fmtShort(a)}
-    </div>`
-  ).join('');
-}
-
-/* ── Render preview ── */
-let selCatIcon = '';
-function renderPreview(){
-  const bar = document.getElementById('previewBar');
-  const eff = effectiveAmt();
-  if (!selCat && !eff) {
-    bar.innerHTML = '<div class="preview-placeholder">Chọn danh mục và số tiền bên dưới...</div>';
-    return;
-  }
-  const catPart = selCat ? `<div class="preview-cat">${selCatIcon} ${selCat}</div>` : `<div class="preview-cat" style="color:#E4969E;">⚠ Chọn danh mục</div>`;
-  const amtPart = eff ? `<div class="preview-amount">₫${fmtAmt(eff)}</div>` : `<div class="preview-cat" style="color:#E4969E;">⚠ Chọn số tiền</div>`;
-  bar.innerHTML = `<div class="preview-icon">${selCatIcon||'❓'}</div><div class="preview-text">${catPart}${amtPart}</div>`;
-}
-
-/* ── Render recent ── */
-function renderRecent(){
-  const txs = db.transactions
-    .filter(t => t.type==='expense')
-    .slice(-5).reverse();
-  const sec = document.getElementById('recentSection');
-  const list = document.getElementById('recentList');
-  if (txs.length === 0) { sec.style.display='none'; return; }
-  sec.style.display='block';
-  list.innerHTML = txs.map(t => {
-    const cat = (db.categories.expense||DEFAULT_CATS).find(c=>c.name===t.category) || {icon:'📦',color:'#9CA3AF'};
-    return `<div class="recent-item">
-      <div class="recent-icon" style="background:${cat.color}22">${cat.icon}</div>
-      <div class="recent-info">
-        <div class="recent-cat">${t.category}</div>
-        <div class="recent-note">${t.note||''}</div>
-      </div>
-      <div>
-        <div class="recent-amt">₫${fmtAmt(t.amount)}</div>
-        <div class="recent-time">${t.time||''}</div>
-      </div>
-    </div>`;
-  }).join('');
+function updateSyncBadge(){
+  const labels = { offline:'Cục bộ', syncing:'Sync...', synced:'Đã sync', error:'Lỗi' };
+  document.getElementById('syncBadge').innerHTML = `<div class="sync-dot ${_syncStatus}"></div><span>${labels[_syncStatus]||''}</span>`;
 }
 
 /* ── Selections ── */
+function selWallet(wid){ selWalletId = wid; renderWallets(); checkAutoSave(); }
 function selectCat(enc, iconEnc){
   selCat = decodeURIComponent(enc);
   selCatIcon = decodeURIComponent(iconEnc);
-  renderCats(); renderPreview(); updateSaveBtn();
+  renderCats(); checkAutoSave();
 }
 
-function selectAmt(a){
-  selAmt = a; customAmtValue = null;
-  document.getElementById('customAmt').value = '';
-  renderAmts(); renderPreview(); updateSaveBtn();
-  // Auto-save nếu đã chọn danh mục
-  if (selCat) save();
-}
-
-function effectiveAmt(){
-  if (customAmtValue > 0) return customAmtValue;
-  return selAmt || null;
-}
-
-function updateSaveBtn(){
-  const btn = document.getElementById('saveBtn');
-  btn.disabled = !(selCat && effectiveAmt());
-}
-
-/* ── Custom amount ── */
-document.getElementById('customAmt').addEventListener('input', function(){
-  const raw = this.value.replace(/\./g,'').replace(/\D/g,'');
-  const n = parseInt(raw,10) || 0;
-  // Format hiển thị
-  if (raw) this.value = n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
-  customAmtValue = n > 0 ? n : null;
-  selAmt = null;
-  renderAmts(); renderPreview(); updateSaveBtn();
+/* ── Amount input (giống trang chính: 000 prefill, dấu chấm) ── */
+const amtEl = document.getElementById('amtInput');
+amtEl.addEventListener('focus', function(){
+  if (this.value === '000') setTimeout(() => { try { this.setSelectionRange(0,0); } catch(e){} }, 50);
 });
+amtEl.addEventListener('keydown', function(e){
+  const allow = ['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End','Enter'];
+  if (allow.includes(e.key)) return;
+  if (e.key >= '0' && e.key <= '9') return;
+  e.preventDefault();
+});
+amtEl.addEventListener('input', function(){
+  const raw = this.value.replace(/\./g,'').replace(/\D/g,'');
+  if (!raw || raw === '0' || raw === '00' || raw === '000') {
+    // giữ nguyên khi đang gõ đầu
+  } else {
+    const n = parseInt(raw, 10);
+    if (n) this.value = n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+  checkAutoSave();
+});
+amtEl.addEventListener('blur', function(){
+  const raw = this.value.replace(/\./g,'').replace(/\D/g,'');
+  if (!raw || raw === '0' || raw === '00' || raw === '000') { this.value = '000'; return; }
+  const n = parseInt(raw, 10);
+  this.value = n > 0 ? n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.') : '000';
+});
+function addAmt(delta){
+  const raw = amtEl.value.replace(/\./g,'').replace(/\D/g,'');
+  let cur = parseInt(raw, 10) || 0;
+  if (raw === '000' || raw === '00' || raw === '0') cur = 0;
+  cur += delta;
+  amtEl.value = cur.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  checkAutoSave();
+}
+function currentAmt(){
+  const raw = amtEl.value.replace(/\./g,'').replace(/\D/g,'');
+  if (!raw || raw === '000' || raw === '00' || raw === '0') return 0;
+  return parseInt(raw, 10) || 0;
+}
+
+/* ── Auto-save logic ── */
+function checkAutoSave(){
+  const amt = currentAmt();
+  const ready = selWalletId && selCat && amt > 0;
+  document.getElementById('saveBtn').disabled = !ready;
+  const hint = document.getElementById('autoHint');
+  if (isSaving) {
+    hint.textContent = '💾 Đang lưu...'; hint.className = 'auto-hint saving';
+    return;
+  }
+  if (!ready) {
+    const missing = [];
+    if (!selWalletId) missing.push('ví');
+    if (!selCat) missing.push('danh mục');
+    if (amt <= 0) missing.push('số tiền');
+    hint.textContent = '⌛ Chưa đủ: ' + missing.join(', ');
+    hint.className = 'auto-hint';
+  } else {
+    hint.textContent = '✓ Sẵn sàng — tự lưu sau 1s, hoặc bấm Lưu';
+    hint.className = 'auto-hint ready';
+    // Debounce auto-save
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => save(), 1000);
+  }
+}
 
 /* ── Save ── */
 function save(){
-  const amt = effectiveAmt();
-  if (!selCat || !amt) {
-    if (!selCat) highlight('catGrid'); return;
-  }
+  if (isSaving) return;
+  if (autoSaveTimer) { clearTimeout(autoSaveTimer); autoSaveTimer = null; }
+  const amt = currentAmt();
+  if (!selWalletId || !selCat || amt <= 0) return;
+  isSaving = true;
   const note = document.getElementById('noteInput').value.trim();
   const tx = {
     id: uid(),
-    walletId: db.settings.activeWalletId || db.wallets[0].id,
+    walletId: selWalletId,
     type: 'expense',
     amount: amt,
     category: selCat,
     note: note,
     date: todayStr(),
-    time: nowTimeStr(),
+    time: nowTimeStr()
   };
   db.transactions.push(tx);
+  db.settings.activeWalletId = selWalletId;
   saveDB();
-  showSuccess(amt, note);
-  // Push lên cloud nếu đã đăng nhập
   if (fbUser) pushCloud();
+  showSuccess(amt, note);
+  // Reset (giữ ví)
+  selCat = null; selCatIcon = '';
+  document.getElementById('amtInput').value = '000';
+  document.getElementById('noteInput').value = '';
+  setTimeout(() => {
+    isSaving = false;
+    renderCats(); renderWallets(); checkAutoSave();
+  }, 1200);
 }
-
 function showSuccess(amt, note){
   document.getElementById('successText').textContent = '✓ Đã lưu ₫' + fmtAmt(amt);
   document.getElementById('successSub').textContent = selCat + (note ? ' · ' + note : '') + ' · ' + nowTimeStr();
   const ov = document.getElementById('successOverlay');
   ov.classList.add('show');
-  setTimeout(() => {
-    ov.classList.remove('show');
-    // Reset amount, giữ category để ghi nhanh cùng loại
-    selAmt = null; customAmtValue = null;
-    document.getElementById('customAmt').value = '';
-    document.getElementById('noteInput').value = '';
-    renderAmts(); renderPreview(); updateSaveBtn();
-    renderRecent();
-  }, 1400);
+  setTimeout(() => ov.classList.remove('show'), 1100);
 }
 
-function highlight(id){
-  const el = document.getElementById(id);
-  el.style.animation = 'none';
-  el.offsetHeight;
-  el.style.animation = 'shake 0.3s ease';
-  setTimeout(()=>el.style.animation='', 300);
-}
-
-/* ── CSS shake animation ── */
-const style = document.createElement('style');
-style.textContent = '@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }';
-document.head.appendChild(style);
-
-/* ============================================================
-   FIREBASE — đồng bộ với app chính
-   ============================================================ */
-function updateSyncBadge() {
-  const badge = document.getElementById('syncBadge');
-  if (!badge) return;
-  const labels = { offline:'Cục bộ', syncing:'Sync...', synced:'Đã sync', error:'Lỗi' };
-  badge.innerHTML = '<div class="sync-dot ' + _syncStatus + '"></div><span>' + (labels[_syncStatus] || '') + '</span>';
-}
-
-async function pullCloud(showLoading = true) {
+/* ── Firebase sync ── */
+async function pullCloud(showLoad = true){
   if (!fbUser || !fbStore) return;
-  if (showLoading) document.getElementById('loadingOverlay').classList.add('show');
+  if (showLoad) document.getElementById('loadingOverlay').classList.add('show');
   _syncStatus = 'syncing'; updateSyncBadge();
   try {
     const ref = fbStore.collection('users').doc(fbUser.uid).collection('app').doc('data');
     const snap = await ref.get();
     if (snap.exists) {
-      const cloudData = snap.data();
-      if (cloudData && cloudData.db) {
-        db = cloudData.db;
-        // Đảm bảo các field tồn tại
+      const d = snap.data();
+      if (d && d.db) {
+        db = d.db;
         db.wallets = db.wallets || [];
         db.transactions = db.transactions || [];
-        db.categories = db.categories || { expense: DEFAULT_CATS, income: [] };
+        db.categories = db.categories || {expense:DEFAULT_CATS, income:[]};
         if (!db.categories.expense || !db.categories.expense.length) db.categories.expense = DEFAULT_CATS;
         db.settings = db.settings || {};
         if (db.wallets.length === 0) {
-          const w = { id:'w1', name:'Ví của tôi', icon:'💼', currency:'VND', initialBalance:0 };
+          const w = {id:'w1', name:'Ví của tôi', icon:'💼', currency:'VND', initialBalance:0};
           db.wallets.push(w); db.settings.activeWalletId = w.id;
         }
-        // Lưu vào localStorage cho lần sau
-        localStorage.setItem(STORE_KEY, JSON.stringify(db));
+        selWalletId = db.settings.activeWalletId || db.wallets[0].id;
+        saveDB();
       }
     }
     _syncStatus = 'synced';
@@ -575,13 +501,11 @@ async function pullCloud(showLoading = true) {
     console.warn('Pull error:', e);
     _syncStatus = 'error';
   }
-  if (showLoading) document.getElementById('loadingOverlay').classList.remove('show');
+  if (showLoad) document.getElementById('loadingOverlay').classList.remove('show');
   updateSyncBadge();
-  // Re-render với dữ liệu từ cloud
-  renderWallet(); renderCats(); renderRecent();
+  renderWallets(); renderCats(); checkAutoSave();
 }
-
-async function pushCloud() {
+async function pushCloud(){
   if (!fbUser || !fbStore) return;
   _syncStatus = 'syncing'; updateSyncBadge();
   try {
@@ -592,44 +516,29 @@ async function pushCloud() {
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     _syncStatus = 'synced';
-  } catch(e) {
-    console.warn('Push error:', e);
-    _syncStatus = 'error';
-  }
+  } catch(e) { console.warn('Push error:', e); _syncStatus = 'error'; }
   updateSyncBadge();
 }
-
-function initFirebase() {
+function initFirebase(){
   try {
     firebase.initializeApp(FIREBASE_CONFIG);
-    fbAuth  = firebase.auth();
+    fbAuth = firebase.auth();
     fbStore = firebase.firestore();
     fbAuth.onAuthStateChanged(async user => {
       fbUser = user;
-      if (user) {
-        // Đã đăng nhập (từ app chính) → pull dữ liệu xuống
-        await pullCloud(true);
-      } else {
-        // Chưa đăng nhập — chạy với localStorage cục bộ
-        _syncStatus = 'offline';
-        updateSyncBadge();
-      }
+      if (user) await pullCloud(true);
+      else { _syncStatus = 'offline'; updateSyncBadge(); }
     });
-  } catch(e) {
-    console.warn('Firebase init error:', e);
-    _syncStatus = 'error'; updateSyncBadge();
-  }
+  } catch(e) { _syncStatus = 'error'; updateSyncBadge(); }
 }
 
 /* ── Khởi động ── */
 loadDB();
-renderWallet();
+renderWallets();
 renderCats();
-renderAmts();
-renderPreview();
-renderRecent();
 updateSyncBadge();
-initFirebase(); // Sau cùng — sẽ pull cloud nếu đã login
+checkAutoSave();
+initFirebase();
 </script>
 </body>
 </html>

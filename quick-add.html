@@ -8,6 +8,10 @@
 <meta name="theme-color" content="#3D7D78">
 <title>Ghi nhanh</title>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <style>
 :root {
   --teal:      #5EA09B;
@@ -62,6 +66,31 @@ body {
   padding:6px 14px; border-radius:20px; text-decoration:none;
   backdrop-filter:blur(8px);
 }
+.sync-badge {
+  position:relative; z-index:1; display:flex; align-items:center; gap:5px;
+  background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.3);
+  color:#fff; font-size:11px; font-weight:600;
+  padding:4px 10px; border-radius:20px;
+  backdrop-filter:blur(8px); margin-right:6px;
+}
+.sync-dot { width:6px; height:6px; border-radius:50%; }
+.sync-dot.synced { background:#22C55E; }
+.sync-dot.syncing { background:#FBBF24; animation:pulse 1s infinite; }
+.sync-dot.error { background:#E4969E; }
+.sync-dot.offline { background:#9CA3AF; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.loading-overlay {
+  position:fixed; inset:0; background:rgba(237,231,220,0.95);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  z-index:998; opacity:0; pointer-events:none; transition:opacity 0.2s;
+}
+.loading-overlay.show { opacity:1; pointer-events:auto; }
+.spinner {
+  width:36px; height:36px; border:3px solid var(--teal-lite);
+  border-top-color:var(--teal-dark); border-radius:50%;
+  animation:spin 0.7s linear infinite; margin-bottom:10px;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
 
 /* ── Scroll content ── */
 .content {
@@ -208,7 +237,16 @@ body {
       <div class="header-wallet" id="walletLabel">💼 —</div>
     </div>
   </div>
-  <a href="rolly-finance-app.html" class="open-app-btn">Mở app ↗</a>
+  <div style="display:flex;align-items:center;">
+    <div class="sync-badge" id="syncBadge"><div class="sync-dot offline"></div><span>...</span></div>
+    <a href="rolly-finance-app.html" class="open-app-btn">App ↗</a>
+  </div>
+</div>
+
+<!-- Loading overlay when pulling cloud data -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:var(--gray);font-weight:600;">Đang đồng bộ từ cloud...</div>
 </div>
 
 <!-- Scrollable content -->
@@ -278,6 +316,19 @@ const DEFAULT_CATS = [
   {name:'Mua sắm', icon:'🛍️', color:'#10B981'},
   {name:'Khác', icon:'📦', color:'#9CA3AF'},
 ];
+
+/* ── Firebase Config (đồng bộ với app chính) ── */
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyBFC3zt8kEI6aDO6d4NZcIx7r8KqU6xBJc",
+  authDomain:        "moneybot-fd2e2.firebaseapp.com",
+  projectId:         "moneybot-fd2e2",
+  storageBucket:     "moneybot-fd2e2.firebasestorage.app",
+  messagingSenderId: "51757805010",
+  appId:             "1:51757805010:web:1c5087f0ad375c7ae5ec0b"
+};
+
+let fbAuth = null, fbStore = null, fbUser = null;
+let _syncStatus = 'offline'; // offline | syncing | synced | error
 
 /* ── Trạng thái ── */
 let selCat = null;
@@ -451,6 +502,8 @@ function save(){
   db.transactions.push(tx);
   saveDB();
   showSuccess(amt, note);
+  // Push lên cloud nếu đã đăng nhập
+  if (fbUser) pushCloud();
 }
 
 function showSuccess(amt, note){
@@ -482,6 +535,92 @@ const style = document.createElement('style');
 style.textContent = '@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }';
 document.head.appendChild(style);
 
+/* ============================================================
+   FIREBASE — đồng bộ với app chính
+   ============================================================ */
+function updateSyncBadge() {
+  const badge = document.getElementById('syncBadge');
+  if (!badge) return;
+  const labels = { offline:'Cục bộ', syncing:'Sync...', synced:'Đã sync', error:'Lỗi' };
+  badge.innerHTML = '<div class="sync-dot ' + _syncStatus + '"></div><span>' + (labels[_syncStatus] || '') + '</span>';
+}
+
+async function pullCloud(showLoading = true) {
+  if (!fbUser || !fbStore) return;
+  if (showLoading) document.getElementById('loadingOverlay').classList.add('show');
+  _syncStatus = 'syncing'; updateSyncBadge();
+  try {
+    const ref = fbStore.collection('users').doc(fbUser.uid).collection('app').doc('data');
+    const snap = await ref.get();
+    if (snap.exists) {
+      const cloudData = snap.data();
+      if (cloudData && cloudData.db) {
+        db = cloudData.db;
+        // Đảm bảo các field tồn tại
+        db.wallets = db.wallets || [];
+        db.transactions = db.transactions || [];
+        db.categories = db.categories || { expense: DEFAULT_CATS, income: [] };
+        if (!db.categories.expense || !db.categories.expense.length) db.categories.expense = DEFAULT_CATS;
+        db.settings = db.settings || {};
+        if (db.wallets.length === 0) {
+          const w = { id:'w1', name:'Ví của tôi', icon:'💼', currency:'VND', initialBalance:0 };
+          db.wallets.push(w); db.settings.activeWalletId = w.id;
+        }
+        // Lưu vào localStorage cho lần sau
+        localStorage.setItem(STORE_KEY, JSON.stringify(db));
+      }
+    }
+    _syncStatus = 'synced';
+  } catch(e) {
+    console.warn('Pull error:', e);
+    _syncStatus = 'error';
+  }
+  if (showLoading) document.getElementById('loadingOverlay').classList.remove('show');
+  updateSyncBadge();
+  // Re-render với dữ liệu từ cloud
+  renderWallet(); renderCats(); renderRecent();
+}
+
+async function pushCloud() {
+  if (!fbUser || !fbStore) return;
+  _syncStatus = 'syncing'; updateSyncBadge();
+  try {
+    const ref = fbStore.collection('users').doc(fbUser.uid).collection('app').doc('data');
+    await ref.set({
+      db: JSON.parse(JSON.stringify(db)),
+      updatedAtMs: Date.now(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    _syncStatus = 'synced';
+  } catch(e) {
+    console.warn('Push error:', e);
+    _syncStatus = 'error';
+  }
+  updateSyncBadge();
+}
+
+function initFirebase() {
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    fbAuth  = firebase.auth();
+    fbStore = firebase.firestore();
+    fbAuth.onAuthStateChanged(async user => {
+      fbUser = user;
+      if (user) {
+        // Đã đăng nhập (từ app chính) → pull dữ liệu xuống
+        await pullCloud(true);
+      } else {
+        // Chưa đăng nhập — chạy với localStorage cục bộ
+        _syncStatus = 'offline';
+        updateSyncBadge();
+      }
+    });
+  } catch(e) {
+    console.warn('Firebase init error:', e);
+    _syncStatus = 'error'; updateSyncBadge();
+  }
+}
+
 /* ── Khởi động ── */
 loadDB();
 renderWallet();
@@ -489,6 +628,8 @@ renderCats();
 renderAmts();
 renderPreview();
 renderRecent();
+updateSyncBadge();
+initFirebase(); // Sau cùng — sẽ pull cloud nếu đã login
 </script>
 </body>
 </html>

@@ -1061,6 +1061,44 @@ body {
 /* ---- Transfer tx in list ---- */
 .tx-amount.transfer { color: var(--purple) !important; }
 
+/* ---- Modal header row & corner save button ---- */
+.modal-header-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 16px;
+}
+.save-corner-btn {
+  background: linear-gradient(135deg, #60AAA5 0%, #3D7D78 100%);
+  color: #fff; border: none; border-radius: 12px;
+  font-family: var(--font); font-size: 14px; font-weight: 800;
+  padding: 8px 16px; cursor: pointer; flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(61,125,120,0.30);
+  transition: transform 0.15s;
+}
+.save-corner-btn:active { transform: scale(0.95); }
+
+/* ---- Chống tràn ngang TOÀN BỘ ---- */
+html, body { overflow-x: hidden !important; max-width: 100vw !important; }
+.phone-frame { overflow-x: hidden !important; max-width: 100vw !important; }
+.modal-sheet { overflow-x: hidden !important; max-width: 100vw !important; }
+.add-tx-form { overflow-x: hidden; min-width: 0; }
+.add-tx-form .form-group { min-width: 0; max-width: 100%; }
+.form-input { max-width: 100%; min-width: 0; }
+/* Cat grid items không được đẩy grid ra ngoài */
+.cat-grid { min-width: 0; }
+.cat-chip { min-width: 0; overflow: hidden; }
+.cat-chip p {
+  min-width: 0; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ---- FAB — khoá hoàn toàn không trôi ngang ---- */
+.fab {
+  touch-action: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  left: auto !important;
+}
+
 /* ---- Sync UI ---- */
 .sync-card {
   background: var(--white); border-radius: var(--radius-sm);
@@ -1389,7 +1427,10 @@ body {
   <div class="modal-overlay" id="modal-add-tx" onclick="closeModal('modal-add-tx')">
     <div class="modal-sheet" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
-      <div class="modal-title" id="txModalTitle">Thêm giao dịch</div>
+      <div class="modal-header-row">
+        <div class="modal-title" id="txModalTitle" style="margin-bottom:0;">Thêm giao dịch</div>
+        <button class="save-corner-btn" onclick="submitTransaction()">✓ Lưu</button>
+      </div>
 
       <div class="add-tx-form">
         <div class="form-group">
@@ -1421,17 +1462,16 @@ body {
         </div>
 
         <div class="form-group" style="display:flex;gap:8px;">
-          <div style="flex:2">
+          <div style="flex:2;min-width:0;">
             <div class="form-label">Ngày</div>
             <input class="form-input" id="txDate" type="date"/>
           </div>
-          <div style="flex:1">
+          <div style="flex:1;min-width:0;">
             <div class="form-label">Giờ</div>
             <input class="form-input" id="txTime" type="time"/>
           </div>
         </div>
 
-        <button class="submit-btn" onclick="submitTransaction()">✓ Lưu giao dịch</button>
         <button class="danger-btn" id="txDeleteBtn" style="display:none" onclick="deleteTransaction()">🗑 Xoá giao dịch</button>
       </div>
     </div>
@@ -3343,10 +3383,12 @@ switchScreen('home');
   // Khoá X cứng sau mỗi lần cập nhật vị trí
   function setFabTop(newTop){
     const clamped = Math.max(60, Math.min(window.innerHeight - 80, newTop));
+    fab.style.position = 'fixed';
     fab.style.top    = clamped + 'px';
     fab.style.bottom = 'auto';
     fab.style.right  = FAB_RIGHT + 'px';  // khoá ngang
     fab.style.left   = 'auto';            // ngăn left ảnh hưởng
+    fab.style.transform = 'none';         // chặn transform làm dịch ngang
   }
 
   fab.addEventListener('touchstart', function(e){

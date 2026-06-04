@@ -235,13 +235,8 @@ function openTool(name){
   else if (name === 'debt') switchScreen('debt');
   else if (name === 'challenge') switchScreen('challenge');
 }
-function openAIAnalysis(){ switchScreen('ai'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 function openModal(id){ document.getElementById(id).classList.add('open'); }
-function openPremiumModal(){ openModal('modal-premium'); }
-function activatePremium(){ closeModal('modal-premium'); showToast('🎉 Đã kích hoạt Premium! Mọi tính năng đã mở!'); }
-function quickTransfer(){ showToast('Mẹo: tạo 1 chi ở ví này và 1 thu ở ví kia để chuyển quỹ.'); }
-function quickRecurring(){ showToast('Giao dịch định kỳ đang được phát triển!'); }
 function toggleSearch(){ const r = document.getElementById('txSearchRow'); r.classList.toggle('show'); if (r.classList.contains('show')) document.getElementById('txSearch').focus(); else { document.getElementById('txSearch').value=''; renderTransactions(); } }
 function goToday(){ anchor = new Date(); renderAll(); showToast('Đã về kỳ hiện tại'); }
 
@@ -782,87 +777,6 @@ function submitAddMoney(){
   const s = db.savings.find(x => x.id === addMoneyId);
   if (s) { s.current += amt; saveDB(); }
   closeModal('modal-addmoney'); renderAll(); showToast('➕ Đã nạp ' + fmt(amt) + ' vào mục tiêu');
-}
-
-/* ============================================================
-   AI CHAT - nhập nhanh giao dịch
-   ============================================================ */
-function parseChatAmount(lower){
-  let m = lower.match(/(\d+(?:[.,]\d+)?)\s*(?:tr|triệu|triẹu|m)\b/);
-  if (m) return Math.round(parseFloat(m[1].replace(',','.')) * 1e6);
-  m = lower.match(/(\d+(?:[.,]\d+)?)\s*k\b/);
-  if (m) return Math.round(parseFloat(m[1].replace(',','.')) * 1e3);
-  m = lower.match(/(\d{4,})/);
-  if (m) return parseInt(m[1]);
-  m = lower.match(/(\d+)/);
-  if (m) return parseInt(m[1]) * 1000; // số nhỏ coi như nghìn
-  return null;
-}
-const CHAT_CAT_KEYWORDS = [
-  {cat:'Thức ăn & Đồ uống', kw:['ăn','uống','cafe','cà phê','bún','phở','cơm','trà sữa','nhậu','bữa','đồ ăn','quán']},
-  {cat:'Giao thông', kw:['xăng','grab','taxi','xe','vé xe','gửi xe','đổ xăng','bus']},
-  {cat:'Nhà', kw:['điện','nước','thuê nhà','tiền nhà','internet','wifi','gas']},
-  {cat:'Giải trí', kw:['phim','game','netflix','spotify','nhạc','chơi','du lịch','xem']},
-  {cat:'Mua sắm', kw:['mua','shopee','lazada','quần áo','giày','áo','váy','đồ']},
-  {cat:'Y tế', kw:['thuốc','khám','bệnh','viện','bác sĩ']},
-  {cat:'Học tập', kw:['học','sách','khoá học','học phí']},
-  {cat:'Làm đẹp', kw:['tóc','spa','mỹ phẩm','son','làm đẹp','nail']},
-  {cat:'Quà tặng', kw:['quà','tặng','mừng','lì xì']},
-];
-const INCOME_KEYWORDS = ['lương','thưởng','nhận','thu nhập','được trả','bán','tiền về','hoàn tiền'];
-function detectCat(lower, type){
-  if (type === 'income') {
-    if (lower.includes('thưởng')) return 'Thưởng';
-    if (lower.includes('lương')) return 'Lương';
-    if (lower.includes('bán') || lower.includes('đầu tư')) return 'Đầu tư';
-    return 'Lương';
-  }
-  for (const g of CHAT_CAT_KEYWORDS) { if (g.kw.some(k => lower.includes(k))) return g.cat; }
-  return 'Khác';
-}
-function sendChatMessage(){
-  const input = document.getElementById('chatInput');
-  const text = input.value.trim();
-  if (!text) return;
-  const container = document.getElementById('chatMessages');
-  const userMsg = document.createElement('div');
-  userMsg.className = 'msg-user';
-  userMsg.textContent = text;
-  container.appendChild(userMsg);
-  input.value = '';
-  container.scrollTop = container.scrollHeight;
-
-  setTimeout(() => {
-    const lower = text.toLowerCase();
-    const amount = parseChatAmount(lower);
-    if (amount) {
-      const type = INCOME_KEYWORDS.some(k => lower.includes(k)) ? 'income' : 'expense';
-      const cat = detectCat(lower, type);
-      const meta = catMeta(cat, type);
-      const note = text.replace(/[\d.,]+\s*(tr|triệu|triẹu|k|m)?\b/gi, '').trim() || cat;
-      const date = todayStr();
-      db.transactions.push({ id:uid(), walletId:db.settings.activeWalletId, type, amount, category:cat, note, date });
-      saveDB(); renderAll();
-      const d = new Date();
-      const receipt = document.createElement('div');
-      receipt.className = 'tx-receipt';
-      receipt.style.borderLeftColor = meta.color;
-      receipt.innerHTML =
-          '<div style="display:flex;justify-content:space-between;align-items:center;">'
-        + '<span class="receipt-label">Đã ghi nhận: ' + (type === 'income' ? 'Thu nhập' : 'Chi phí') + '</span>'
-        + '<span class="receipt-date">' + DAYS_SHORT[d.getDay()] + ', ' + d.getDate() + ' thg ' + (d.getMonth()+1) + '</span></div>'
-        + '<div class="receipt-row"><div class="receipt-icon" style="background:' + meta.color + '22">' + meta.icon + '</div>'
-        + '<div class="receipt-info"><div class="receipt-cat">' + esc(cat) + '</div><div class="receipt-note">' + esc(note) + '</div></div>'
-        + '<div class="receipt-amount" style="color:' + (type === 'income' ? 'var(--teal)' : 'var(--pink)') + '">' + (type === 'income' ? '🔺' : '🔻') + ' ' + fmt(amount) + '</div></div>';
-      container.appendChild(receipt);
-    } else {
-      const botMsg = document.createElement('div');
-      botMsg.className = 'msg-bot';
-      botMsg.textContent = 'Hãy nhập kèm số tiền nhé, ví dụ: "ăn tối 50k", "đổ xăng 100k" hoặc "lương 15tr". 😊';
-      container.appendChild(botMsg);
-    }
-    container.scrollTop = container.scrollHeight;
-  }, 400);
 }
 
 /* ============================================================

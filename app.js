@@ -176,7 +176,11 @@ function setHomeTab(t){ homeTab = t; renderAll(); }
 
 /* ---------- Truy vấn dữ liệu ---------- */
 // txInPeriod: gộp TẤT CẢ ví (home/chart), hoặc lọc theo txWalletFilter (transactions screen)
-let txWalletFilter = 'all'; // 'all' hoặc walletId cụ thể
+let txWalletFilter = 'all';       // 'all' hoặc walletId cụ thể
+let txTypeFilter   = 'all';       // 'all' | 'expense' | 'income' (4.8)
+let txCategoryFilter = null;      // null hoặc tên danh mục (4.9)
+let txSearchGlobal = false;       // true = bỏ giới hạn kỳ khi search (4.7)
+let _lastDeleted = null;          // {tx: ..., timer: ...} cho undo (4.2)
 
 function txInPeriod(walletId){
   const r = periodRange();
@@ -254,7 +258,18 @@ function openTool(name){
 }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 function openModal(id){ document.getElementById(id).classList.add('open'); }
-function toggleSearch(){ const r = document.getElementById('txSearchRow'); r.classList.toggle('show'); if (r.classList.contains('show')) document.getElementById('txSearch').focus(); else { document.getElementById('txSearch').value=''; renderTransactions(); } }
+function toggleSearch(){
+  const r = document.getElementById('txSearchRow');
+  r.classList.toggle('show');
+  if (r.classList.contains('show')) {
+    txSearchGlobal = true; // 4.7: tìm toàn cục khi mở
+    document.getElementById('txSearch').focus();
+  } else {
+    document.getElementById('txSearch').value = '';
+    txSearchGlobal = false;
+    renderTransactions();
+  }
+}
 function goToday(){ anchor = new Date(); renderAll(); showToast('Đã về kỳ hiện tại'); }
 
 /* ============================================================
@@ -378,7 +393,10 @@ function renderChart(){
   let list = '';
   arr.forEach(a => {
     const pct = Math.round(a.amount / total * 100);
-    list += '<div class="category-item"><div class="cat-icon" style="background:' + a.meta.color + '22">' + a.meta.icon + '</div>'
+    // 4.9: click vào hàng danh mục → mở Giao dịch lọc theo
+    const enc = btoa(unescape(encodeURIComponent(a.name)));
+    list += '<div class="category-item" style="cursor:pointer;" onclick="filterByCategoryEnc(\'' + enc + '\')">'
+      + '<div class="cat-icon" style="background:' + a.meta.color + '22">' + a.meta.icon + '</div>'
       + '<div class="cat-info"><div class="cat-name">' + esc(a.name) + '</div>'
       + '<div class="cat-bar-wrap"><div class="cat-bar-bg"><div class="cat-bar" style="width:' + pct + '%;background:' + a.meta.color + '"></div></div><div class="cat-pct">' + pct + '%</div></div></div>'
       + '<div class="cat-amount">' + fmt(a.amount) + '</div></div>';
@@ -400,11 +418,32 @@ function renderTransactions(){
     filterRow.innerHTML = '<button class="wf-chip' + (txWalletFilter === 'all' ? ' active' : '') + '" onclick="setTxFilter(\'all\')">Tất cả ví</button>'
       + db.wallets.map(w => '<button class="wf-chip' + (txWalletFilter === w.id ? ' active' : '') + '" onclick="setTxFilter(\'' + w.id + '\')">' + (w.icon||'💼') + ' ' + esc(w.name) + '</button>').join('');
   }
+  // Type + Category filter chips (4.8 + 4.9)
+  const typeRow = document.getElementById('txTypeFilter');
+  if (typeRow) {
+    let h = '<button class="wf-chip' + (txTypeFilter==='all'?' active':'') + '" onclick="setTxTypeFilter(\'all\')">Tất cả</button>'
+      + '<button class="wf-chip' + (txTypeFilter==='expense'?' active':'') + '" onclick="setTxTypeFilter(\'expense\')">🔻 Chi</button>'
+      + '<button class="wf-chip' + (txTypeFilter==='income'?' active':'') + '" onclick="setTxTypeFilter(\'income\')">🔺 Thu</button>';
+    if (txCategoryFilter) {
+      h += '<button class="wf-chip active" onclick="setTxCatFilter(null)">'
+        + (catMeta(txCategoryFilter, 'expense').icon || '🏷️') + ' ' + esc(txCategoryFilter) + ' ✕</button>';
+    }
+    typeRow.innerHTML = h;
+  }
 
   const q = (document.getElementById('txSearch') ? document.getElementById('txSearch').value : '').trim().toLowerCase();
   const filterWid = txWalletFilter === 'all' ? null : txWalletFilter;
-  let txs = txInPeriodAll(filterWid); // bao gồm cả transfer
+  // 4.7: nếu có search query → bỏ giới hạn kỳ (tìm trong toàn bộ db)
+  let txs;
+  if (q && txSearchGlobal) {
+    txs = db.transactions.slice();
+    if (filterWid) txs = txs.filter(t => t.walletId === filterWid || t.toWalletId === filterWid);
+  } else {
+    txs = txInPeriodAll(filterWid);
+  }
   if (q) txs = txs.filter(t => (t.note||'').toLowerCase().includes(q) || (t.category||'').toLowerCase().includes(q));
+  if (txTypeFilter !== 'all') txs = txs.filter(t => t.type === txTypeFilter);
+  if (txCategoryFilter) txs = txs.filter(t => t.category === txCategoryFilter);
   let exp = 0, inc = 0;
   txs.forEach(t => { if (t.type === 'income') inc += t.amount; else exp += t.amount; });
   document.getElementById('txSummaryBar').innerHTML =
@@ -430,34 +469,51 @@ function renderTransactions(){
     html += '<div class="tx-group"><div class="tx-date-header"><span>' + fmtDateHeader(d) + '</span>'
       + '<span style="color:' + (dnet >= 0 ? 'var(--teal)' : 'var(--pink)') + '">' + fmtSigned(dnet) + '</span></div>';
     groups[d].forEach(t => {
+      let inner;
       if (t.type === 'transfer') {
         const wFrom = db.wallets.find(w => w.id === t.walletId);
         const wTo = db.wallets.find(w => w.id === t.toWalletId);
-        html += '<div class="tx-item" onclick="openTransferDetail(\'' + t.id + '\')">'
+        inner = '<div class="tx-item" data-tx-id="' + t.id + '" onclick="openTransferDetail(\'' + t.id + '\')">'
           + '<div class="tx-icon" style="background:#EDE9FE">⇄</div>'
           + '<div class="tx-info"><div class="tx-cat">Chuyển khoản</div>'
           + '<div class="tx-note">' + (wFrom?wFrom.icon+' '+esc(wFrom.name):'?') + ' → ' + (wTo?wTo.icon+' '+esc(wTo.name):'?') + '</div>'
           + (t.note ? '<div class="tx-note">' + esc(t.note) + '</div>' : '') + '</div>'
           + '<div class="tx-amount transfer">⇄ ' + fmt(t.amount) + '</div></div>';
-        return;
+      } else {
+        const m = catMeta(t.category, t.type);
+        const tw = db.wallets.find(w => w.id === t.walletId);
+        const walletTag = db.wallets.length > 1
+          ? '<span style="font-size:10px;color:var(--gray-400);margin-top:1px;">' + (tw ? tw.icon + ' ' + esc(tw.name) : '') + '</span>'
+          : '';
+        const timeTag = t.time ? '<span style="font-size:10px;color:var(--gray-300);margin-left:4px;">'+t.time+'</span>' : '';
+        inner = '<div class="tx-item" data-tx-id="' + t.id + '" onclick="openTxModal(\'' + t.id + '\')">'
+          + '<div class="tx-icon" style="background:' + m.color + '22">' + m.icon + '</div>'
+          + '<div class="tx-info"><div class="tx-cat">' + esc(t.category) + timeTag + '</div>'
+          + '<div class="tx-note">' + esc(t.note||'') + '</div>' + walletTag + '</div>'
+          + '<div class="tx-amount ' + t.type + '">' + (t.type === 'income' ? '🔺' : '🔻') + ' ' + fmt(t.amount, tw ? tw.currency : 'VND') + '</div></div>';
       }
-      const m = catMeta(t.category, t.type);
-      const tw = db.wallets.find(w => w.id === t.walletId);
-      const walletTag = db.wallets.length > 1
-        ? '<span style="font-size:10px;color:var(--gray-400);margin-top:1px;">' + (tw ? tw.icon + ' ' + esc(tw.name) : '') + '</span>'
-        : '';
-      const timeTag = t.time ? '<span style="font-size:10px;color:var(--gray-300);margin-left:4px;">'+t.time+'</span>' : '';
-      html += '<div class="tx-item" onclick="openTxModal(\'' + t.id + '\')">'
-        + '<div class="tx-icon" style="background:' + m.color + '22">' + m.icon + '</div>'
-        + '<div class="tx-info"><div class="tx-cat">' + esc(t.category) + timeTag + '</div>'
-        + '<div class="tx-note">' + esc(t.note||'') + '</div>' + walletTag + '</div>'
-        + '<div class="tx-amount ' + t.type + '">' + (t.type === 'income' ? '🔺' : '🔻') + ' ' + fmt(t.amount, tw ? tw.currency : 'VND') + '</div></div>';
+      html += '<div class="tx-item-wrap">' + inner + '</div>';
     });
     html += '</div>';
   });
   list.innerHTML = html;
 }
 function setTxFilter(wid){ txWalletFilter = wid; renderTransactions(); }
+function setTxTypeFilter(t){ txTypeFilter = t; renderTransactions(); }
+function setTxCatFilter(cat){ txCategoryFilter = cat; renderTransactions(); }
+function resetTxFilters(){ txWalletFilter='all'; txTypeFilter='all'; txCategoryFilter=null; }
+// 4.9: gọi từ donut Trang chủ → mở Giao dịch lọc theo danh mục
+function filterByCategory(cat){
+  txCategoryFilter = cat;
+  // Detect type theo cat đang ở danh sách nào (expense hay income)
+  const isIncome = (db.categories.income||[]).find(c => c.name === cat);
+  txTypeFilter = isIncome ? 'income' : 'expense';
+  switchScreen('transactions');
+  showToast('Lọc: ' + cat);
+}
+function filterByCategoryEnc(b64){
+  try { filterByCategory(decodeURIComponent(escape(atob(b64)))); } catch(e){}
+}
 
 function renderBudgets(){
   const lbl = document.getElementById('budgetMonthLabel'); if (lbl) lbl.textContent = monthLabel();
@@ -636,8 +692,54 @@ function submitTransaction(){
 }
 function deleteTransaction(){
   if (!editingTxId) return;
-  db.transactions = db.transactions.filter(t => t.id !== editingTxId);
-  saveDB(); closeModal('modal-add-tx'); renderAll(); showToast('🗑 Đã xoá giao dịch');
+  closeModal('modal-add-tx');
+  deleteTxWithUndo(editingTxId);
+}
+
+// 4.2: xoá giao dịch với hỗ trợ Hoàn tác
+function deleteTxWithUndo(txId){
+  const idx = db.transactions.findIndex(t => t.id === txId);
+  if (idx === -1) return;
+  const tx = db.transactions[idx];
+  db.transactions.splice(idx, 1);
+  saveDB(); renderAll();
+  // Lưu để undo
+  if (_lastDeleted && _lastDeleted.timer) clearTimeout(_lastDeleted.timer);
+  _lastDeleted = { tx, idx };
+  const label = tx.type === 'transfer' ? 'chuyển khoản' : (tx.type === 'income' ? 'thu nhập' : 'chi phí');
+  showUndoToast('🗑 Đã xoá ' + label + ' ' + fmt(tx.amount));
+}
+function undoLastDelete(){
+  if (!_lastDeleted) return;
+  db.transactions.splice(_lastDeleted.idx, 0, _lastDeleted.tx);
+  saveDB(); renderAll();
+  hideUndoToast();
+  showToast('✓ Đã hoàn tác');
+  _lastDeleted = null;
+}
+function showUndoToast(msg){
+  const t = document.getElementById('undoToast');
+  document.getElementById('undoToastText').textContent = msg;
+  t.classList.add('show');
+  if (_lastDeleted) {
+    if (_lastDeleted.timer) clearTimeout(_lastDeleted.timer);
+    _lastDeleted.timer = setTimeout(() => { hideUndoToast(); _lastDeleted = null; }, 5000);
+  }
+}
+function hideUndoToast(){
+  const t = document.getElementById('undoToast');
+  if (t) t.classList.remove('show');
+}
+
+// 4.4: cộng nhanh vào ô số tiền
+function addAmount(delta){
+  const el = document.getElementById('txAmount');
+  const raw = (el.value || '').replace(/\./g,'').replace(/\D/g,'');
+  let cur = parseInt(raw, 10) || 0;
+  // Nếu đang là 000 (pre-fill) → bỏ qua coi như 0
+  if (raw === '000') cur = 0;
+  cur += delta;
+  el.value = cur.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
 /* ============================================================
@@ -839,6 +941,7 @@ function exportCSV(){
   a.href = url; a.download = 'moneybot-' + todayStr() + '.csv';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  db.settings._lastBackup = Date.now(); saveDB(); // 5.2
   showToast('📤 Đã xuất file CSV');
 }
 function resetData(){
@@ -1696,11 +1799,111 @@ function renderReport(){
   el.innerHTML = trendHtml + topHtml + walletHtml + forecastHtml;
 }
 
+/* ============================================================
+   4.1 LONG-PRESS + 4.3 SWIPE để xoá giao dịch
+   ============================================================ */
+function _txIdFromEl(item){ return item ? item.getAttribute('data-tx-id') : null; }
+function _confirmDeleteTx(txId){
+  const t = db.transactions.find(x => x.id === txId);
+  if (!t) return;
+  const label = t.type === 'transfer' ? 'chuyển khoản' : (t.type === 'income' ? 'thu nhập' : 'chi phí');
+  if (confirm('Xoá ' + label + ' ' + fmt(t.amount) + (t.note ? ' ("' + t.note + '")' : '') + '?')) {
+    deleteTxWithUndo(txId);
+  }
+}
+(function setupTxGestures(){
+  const list = document.getElementById('txList');
+  if (!list) return;
+  let lpTimer = null, lpItem = null;
+  let swStart = null, swItem = null, swDx = 0;
+
+  function clearLongPress(){
+    if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
+    if (lpItem) { lpItem.classList.remove('long-pressing'); lpItem = null; }
+  }
+  function resetSwipe(snap){
+    if (!swItem) return;
+    if (snap) { swItem.classList.add('swipe-snap'); swItem.style.transform = ''; setTimeout(() => swItem && swItem.classList.remove('swipe-snap'), 250); }
+    swItem = null; swStart = null; swDx = 0;
+  }
+
+  list.addEventListener('touchstart', e => {
+    const item = e.target.closest('.tx-item');
+    if (!item) return;
+    swItem = item; swStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; swDx = 0;
+    lpItem = item;
+    lpTimer = setTimeout(() => {
+      if (!lpItem) return;
+      lpItem.classList.add('long-pressing');
+      navigator.vibrate && navigator.vibrate(30);
+      const id = _txIdFromEl(lpItem);
+      clearLongPress();
+      resetSwipe(false);
+      if (id) _confirmDeleteTx(id);
+    }, 550);
+  }, { passive: true });
+
+  list.addEventListener('touchmove', e => {
+    if (!swStart || !swItem) return;
+    const dx = e.touches[0].clientX - swStart.x;
+    const dy = e.touches[0].clientY - swStart.y;
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) clearLongPress();
+    // Chỉ swipe ngang khi |dx| > |dy|
+    if (Math.abs(dx) > Math.abs(dy) && dx < 0) {
+      swDx = Math.max(-150, dx);
+      swItem.style.transform = 'translateX(' + swDx + 'px)';
+    }
+  }, { passive: true });
+
+  list.addEventListener('touchend', e => {
+    clearLongPress();
+    if (!swItem) return;
+    // Swipe trái > 80px → xoá
+    if (swDx < -80) {
+      const id = _txIdFromEl(swItem);
+      swItem.classList.add('swipe-deleted');
+      setTimeout(() => { if (id) deleteTxWithUndo(id); resetSwipe(false); }, 200);
+    } else {
+      resetSwipe(true);
+    }
+  });
+  list.addEventListener('touchcancel', () => { clearLongPress(); resetSwipe(true); });
+})();
+
+/* ============================================================
+   5.2 Nhắc backup CSV hàng tuần
+   ============================================================ */
+function checkBackupReminder(){
+  if (!db.transactions || db.transactions.length < 5) return; // Chưa có gì để backup
+  const last = db.settings._lastBackup || 0;
+  const now = Date.now();
+  const oneWeek = 7 * 24 * 3600 * 1000;
+  if (now - last > oneWeek) {
+    setTimeout(() => {
+      showUndoToast('💾 Đã 7+ ngày chưa backup. Xuất CSV?');
+      // Đổi label nút sang "Xuất ngay"
+      const btn = document.querySelector('#undoToast .undo-btn');
+      if (btn) {
+        btn.textContent = '📤 Xuất CSV';
+        btn.onclick = () => {
+          db.settings._lastBackup = Date.now();
+          saveDB();
+          exportCSV();
+          hideUndoToast();
+          // Khôi phục onclick mặc định sau
+          setTimeout(() => { btn.textContent = '↶ Hoàn tác'; btn.onclick = undoLastDelete; }, 1000);
+        };
+      }
+    }, 2500);
+  }
+}
+
 /* ---------- Khởi động ---------- */
 loadDB();
 document.getElementById('txDate').value = todayStr();
 initFirebase(); // Khởi tạo Firebase (nếu đã cấu hình)
 switchScreen('home');
+checkBackupReminder(); // 5.2: nhắc xuất CSV nếu đã > 7 ngày
 
 /* ============================================================
    AMOUNT INPUT — định dạng VND dấu "." + pre-fill "000"

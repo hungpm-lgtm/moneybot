@@ -67,11 +67,14 @@
     </div>
 
     <div class="tx-search-row" id="txSearchRow">
-      <input class="form-input" id="txSearch" placeholder="Tìm theo ghi chú hoặc danh mục..." oninput="renderTransactions()"/>
+      <input class="form-input" id="txSearch" placeholder="Tìm trong tất cả giao dịch..." oninput="renderTransactions()"/>
     </div>
 
     <!-- Wallet filter chips -->
     <div class="wallet-filter-row" id="txWalletFilter"></div>
+
+    <!-- Type filter (4.8) + Category filter (4.9) -->
+    <div class="wallet-filter-row" id="txTypeFilter" style="padding:6px 16px;"></div>
 
     <div style="background:white; padding:6px 16px 10px; display:flex; gap:8px; align-items:center; border-bottom:1px solid #F3F4F6;">
       <span class="nav-arrow" onclick="navPeriod(-1)">‹</span>
@@ -365,6 +368,15 @@
         <div class="form-group">
           <div class="form-label">Số tiền (₫)</div>
           <input class="form-input" id="txAmount" type="text" placeholder="0" inputmode="numeric" autocomplete="off"/>
+          <!-- Quick amount buttons (4.4) -->
+          <div class="quick-amt-row">
+            <button class="quick-amt" type="button" onclick="addAmount(10000)">+10k</button>
+            <button class="quick-amt" type="button" onclick="addAmount(20000)">+20k</button>
+            <button class="quick-amt" type="button" onclick="addAmount(50000)">+50k</button>
+            <button class="quick-amt" type="button" onclick="addAmount(100000)">+100k</button>
+            <button class="quick-amt" type="button" onclick="addAmount(500000)">+500k</button>
+            <button class="quick-amt" type="button" onclick="addAmount(1000000)">+1tr</button>
+          </div>
         </div>
 
         <div class="form-group">
@@ -681,6 +693,10 @@
 
   <!-- Toast -->
   <div class="toast" id="toast"></div>
+  <div class="toast undo-toast" id="undoToast">
+    <span id="undoToastText">Đã xoá</span>
+    <button class="undo-btn" onclick="undoLastDelete()">↶ Hoàn tác</button>
+  </div>
 </div>
 
 <script src="app.js"></script>

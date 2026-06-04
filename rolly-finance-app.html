@@ -136,7 +136,29 @@
         </div>
         <div class="tool-arrow">›</div>
       </div>
+
+      <div class="tool-card" onclick="switchScreen('report')">
+        <div class="tool-icon-wrap" style="background: linear-gradient(135deg,#3B82F6,#1D4ED8)">📈</div>
+        <div class="tool-info">
+          <div class="tool-name">Báo cáo</div>
+          <div class="tool-desc">Xu hướng 6 tháng, top chi tiêu, so sánh ví, dự báo cuối tháng</div>
+        </div>
+        <div class="tool-arrow">›</div>
+      </div>
     </div>
+  </div>
+
+  <!-- ===== REPORT SCREEN ===== -->
+  <div class="screen" id="screen-report">
+    <div class="screen-header">
+      <div class="back-btn" style="font-size:20px;cursor:pointer;" onclick="switchScreen('tools')">‹ Báo cáo</div>
+    </div>
+    <div style="background:white;padding:8px 16px;display:flex;gap:8px;align-items:center;border-bottom:1px solid #F3F4F6;">
+      <span class="nav-arrow" onclick="navMonth(-1)">‹</span>
+      <span class="period-label" id="reportMonthLabel" style="font-size:13px;">—</span>
+      <span class="nav-arrow" onclick="navMonth(1)">›</span>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:16px;padding-bottom:80px;" id="reportContent"></div>
   </div>
 
   <!-- ===== SETTINGS SCREEN ===== -->

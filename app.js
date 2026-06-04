@@ -137,6 +137,23 @@ function periodRange(){
   else { start = new Date(a.getFullYear(), a.getMonth(), 1); end = new Date(a.getFullYear(), a.getMonth()+1, 1); }
   return { start, end };
 }
+// Kỳ TRƯỚC (3.1): cùng độ dài, lùi đúng 1 unit
+function prevPeriodRange(){
+  const a = new Date(anchor); let start, end;
+  if (currentPeriod === 'day') { const d = new Date(a); d.setDate(d.getDate()-1); start = new Date(d.getFullYear(),d.getMonth(),d.getDate()); end = new Date(d.getFullYear(),d.getMonth(),d.getDate()+1); }
+  else if (currentPeriod === 'week') { const dow = (a.getDay()+6)%7; const s = new Date(a.getFullYear(),a.getMonth(),a.getDate()-dow); s.setDate(s.getDate()-7); start = s; end = new Date(s); end.setDate(s.getDate()+7); }
+  else if (currentPeriod === 'year') { start = new Date(a.getFullYear()-1,0,1); end = new Date(a.getFullYear(),0,1); }
+  else { start = new Date(a.getFullYear(), a.getMonth()-1, 1); end = new Date(a.getFullYear(), a.getMonth(), 1); }
+  return { start, end };
+}
+// Số ngày trong kỳ (đến hôm nay nếu kỳ đang chạy)
+function periodDaysElapsed(){
+  const r = periodRange();
+  const now = new Date();
+  const end = now < r.end ? now : r.end;
+  const diff = Math.max(1, Math.ceil((end - r.start) / 86400000));
+  return diff;
+}
 function periodLabel(){
   const a = anchor;
   if (currentPeriod === 'day') return DAYS_SHORT[a.getDay()]+', '+pad(a.getDate())+'/'+pad(a.getMonth()+1)+'/'+a.getFullYear();
@@ -210,7 +227,7 @@ function monthExpense(year, month, wid){
 
 /* ---------- Điều hướng màn hình ---------- */
 function switchScreen(name){
-  const toolScreens = ['budget','savings','ai','debt','challenge'];
+  const toolScreens = ['budget','savings','ai','debt','challenge','report'];
   const settingsScreens = ['categories'];
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const screenEl = document.getElementById('screen-' + name);
@@ -259,6 +276,7 @@ function renderAll(){
   renderChallengeScreen();
   renderProfileUI();
   renderCatScreen();
+  renderReport();
   if (typeof renderSyncUI === 'function') renderSyncUI();
 }
 
@@ -300,15 +318,39 @@ function renderTotalAssets(){
 }
 
 function renderSummary(){
-  // Gộp TẤT CẢ ví
-  const txs = txInPeriod(); // không truyền wid = tất cả ví
+  // Gộp TẤT CẢ ví — kỳ hiện tại
+  const txs = txInPeriod();
   let exp = 0, inc = 0;
   txs.forEach(t => { if (t.type === 'income') inc += t.amount; else exp += t.amount; });
   const net = inc - exp;
+  // Kỳ TRƯỚC để so sánh (3.1)
+  const pr = prevPeriodRange();
+  let pExp = 0;
+  db.transactions.forEach(t => {
+    if (t.type !== 'expense') return;
+    const d = pd(t.date);
+    if (d >= pr.start && d < pr.end) pExp += t.amount;
+  });
+  let cmpHtml = '';
+  if (pExp > 0) {
+    const diff = Math.round((exp - pExp) / pExp * 100);
+    const arrow = diff >= 0 ? '▲' : '▼';
+    const color = diff > 0 ? 'rgba(255,200,200,0.95)' : 'rgba(180,255,200,0.95)';
+    cmpHtml = '<span style="font-size:11px;font-weight:700;color:' + color + ';margin-left:8px;">'
+      + arrow + ' ' + Math.abs(diff) + '% so kỳ trước</span>';
+  }
+  // Trung bình chi/ngày (3.4) — chỉ khi đang xem tháng/tuần/năm
+  let avgHtml = '';
+  if (currentPeriod !== 'day' && exp > 0) {
+    const days = periodDaysElapsed();
+    const avg = exp / days;
+    avgHtml = '<div style="font-size:11px;opacity:0.85;margin-top:4px;">TB chi: <strong>' + fmt(avg) + '</strong>/ngày · ' + days + ' ngày</div>';
+  }
   document.getElementById('summaryCard').innerHTML =
-      '<div class="summary-label">Thay đổi ròng (tất cả ví)</div>'
+      '<div class="summary-label">Thay đổi ròng (tất cả ví)' + cmpHtml + '</div>'
     + '<div class="summary-amount">' + fmtSigned(net) + '</div>'
-    + '<div class="summary-row">'
+    + avgHtml
+    + '<div class="summary-row" style="margin-top:' + (avgHtml ? '10' : '16') + 'px;">'
     + '  <div class="summary-item"><div class="summary-item-label">Chi phí</div><div class="summary-item-amount">🔻 ' + fmt(exp) + '</div></div>'
     + '  <div class="summary-item"><div class="summary-item-label">Thu nhập</div><div class="summary-item-amount">🔺 ' + fmt(inc) + '</div></div>'
     + '</div>';
@@ -1502,6 +1544,156 @@ function parseCSVLine(line) {
   }
   result.push(cur);
   return result;
+}
+
+/* ============================================================
+   BÁO CÁO (Nhóm 3) — 3.2 xu hướng + 3.3 top + 3.6 so ví + 3.7 dự báo
+   ============================================================ */
+function renderReport(){
+  const el = document.getElementById('reportContent');
+  if (!el) return;
+  const lbl = document.getElementById('reportMonthLabel');
+  if (lbl) lbl.textContent = monthLabel();
+  const y = anchor.getFullYear(), mo = anchor.getMonth();
+
+  // ====== 3.2 BIỂU ĐỒ ĐƯỜNG 6 THÁNG ======
+  // Lấy 6 tháng cuối (kết thúc ở tháng đang xem)
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(y, mo - i, 1);
+    const my = d.getFullYear(), mm = d.getMonth();
+    const start = new Date(my, mm, 1), end = new Date(my, mm + 1, 1);
+    let exp = 0, inc = 0;
+    db.transactions.forEach(t => {
+      if (t.type === 'transfer') return;
+      const td = pd(t.date);
+      if (td < start || td >= end) return;
+      if (t.type === 'income') inc += t.amount; else exp += t.amount;
+    });
+    months.push({ label: 'T' + (mm + 1), exp, inc });
+  }
+  // SVG line chart
+  const W = 320, H = 140, PAD_L = 40, PAD_R = 10, PAD_T = 10, PAD_B = 24;
+  const maxV = Math.max(1, ...months.flatMap(m => [m.exp, m.inc]));
+  const x = i => PAD_L + (i / 5) * (W - PAD_L - PAD_R);
+  const y_ = v => PAD_T + (1 - v / maxV) * (H - PAD_T - PAD_B);
+  const linePath = (key, col) => {
+    const pts = months.map((m,i) => x(i)+','+y_(m[key]));
+    return '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + col + '" stroke-width="2.5" stroke-linejoin="round"/>'
+      + months.map((m,i) => '<circle cx="' + x(i) + '" cy="' + y_(m[key]) + '" r="3" fill="' + col + '"/>').join('');
+  };
+  let svg = '<svg class="trend-svg" viewBox="0 0 ' + W + ' ' + H + '">';
+  // Trục y (gridline 2 đường)
+  [0.5, 1].forEach(r => {
+    svg += '<line x1="' + PAD_L + '" y1="' + y_(maxV * r) + '" x2="' + (W - PAD_R) + '" y2="' + y_(maxV * r) + '" stroke="#F0EBE3" stroke-width="1"/>';
+    svg += '<text x="' + (PAD_L - 4) + '" y="' + (y_(maxV * r) + 3) + '" text-anchor="end" font-size="9" fill="#A8A090">' + fmtShort(maxV * r) + '</text>';
+  });
+  svg += linePath('exp', '#E4969E'); // hồng — chi
+  svg += linePath('inc', '#5EA09B'); // teal — thu
+  // Trục x
+  months.forEach((m,i) => {
+    svg += '<text x="' + x(i) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="10" fill="#787068" font-weight="600">' + m.label + '</text>';
+  });
+  svg += '</svg>';
+  const trendHtml = '<div class="report-section">'
+    + '<div class="report-title"><span class="ic">📈</span> Xu hướng 6 tháng gần nhất</div>'
+    + svg
+    + '<div class="trend-legend"><span><span class="trend-dot" style="background:#E4969E"></span>Chi phí</span>'
+    + '<span><span class="trend-dot" style="background:#5EA09B"></span>Thu nhập</span></div>'
+    + '</div>';
+
+  // ====== 3.3 TOP 5 GIAO DỊCH LỚN NHẤT (tháng đang xem) ======
+  const monthStart = new Date(y, mo, 1), monthEnd = new Date(y, mo+1, 1);
+  const monthExpenses = db.transactions
+    .filter(t => t.type === 'expense' && pd(t.date) >= monthStart && pd(t.date) < monthEnd)
+    .sort((a,b) => b.amount - a.amount).slice(0, 5);
+  let topHtml = '<div class="report-section">'
+    + '<div class="report-title"><span class="ic">🏷️</span> Top 5 chi tiêu lớn nhất tháng</div>';
+  if (monthExpenses.length === 0) {
+    topHtml += '<div style="font-size:12px;color:var(--gray-400);text-align:center;padding:12px;">Chưa có chi tiêu</div>';
+  } else {
+    monthExpenses.forEach((t, i) => {
+      const m = catMeta(t.category, 'expense');
+      topHtml += '<div class="top-item">'
+        + '<div class="top-rank' + (i === 0 ? ' gold' : '') + '">' + (i+1) + '</div>'
+        + '<div style="font-size:18px;width:30px;text-align:center;">' + m.icon + '</div>'
+        + '<div class="top-info">'
+        + '<div class="top-cat">' + esc(t.category) + '</div>'
+        + '<div class="top-note">' + esc(t.note || '') + ' · ' + t.date + '</div>'
+        + '</div>'
+        + '<div class="top-amt">' + fmt(t.amount) + '</div>'
+        + '</div>';
+    });
+  }
+  topHtml += '</div>';
+
+  // ====== 3.6 SO SÁNH CHI TIÊU THEO VÍ (tháng đang xem) ======
+  const walletExp = {};
+  db.wallets.forEach(w => walletExp[w.id] = 0);
+  db.transactions.forEach(t => {
+    if (t.type !== 'expense') return;
+    const td = pd(t.date);
+    if (td < monthStart || td >= monthEnd) return;
+    walletExp[t.walletId] = (walletExp[t.walletId] || 0) + t.amount;
+  });
+  const maxWExp = Math.max(1, ...Object.values(walletExp));
+  let walletHtml = '<div class="report-section">'
+    + '<div class="report-title"><span class="ic">💼</span> Chi tiêu theo ví</div>';
+  if (db.wallets.length === 0 || maxWExp === 1) {
+    walletHtml += '<div style="font-size:12px;color:var(--gray-400);text-align:center;padding:12px;">Chưa có chi tiêu trong tháng</div>';
+  } else {
+    db.wallets.forEach(w => {
+      const v = walletExp[w.id] || 0;
+      const pct = Math.round(v / maxWExp * 100);
+      walletHtml += '<div class="wcmp-row">'
+        + '<div class="wcmp-name">' + (w.icon||'💼') + ' ' + esc(w.name) + '</div>'
+        + '<div class="wcmp-bar-bg"><div class="wcmp-bar" style="width:' + pct + '%"></div></div>'
+        + '<div class="wcmp-val">' + fmtShort(v) + ' ₫</div>'
+        + '</div>';
+    });
+  }
+  walletHtml += '</div>';
+
+  // ====== 3.7 DỰ BÁO CUỐI THÁNG ======
+  let forecastHtml = '<div class="report-section">'
+    + '<div class="report-title"><span class="ic">🔮</span> Dự báo cuối tháng</div>';
+  // Chỉ dự báo khi đang xem tháng hiện tại
+  const now = new Date();
+  const isCurrentMonth = now.getFullYear() === y && now.getMonth() === mo;
+  const currentDay = isCurrentMonth ? now.getDate() : new Date(y, mo+1, 0).getDate();
+  const daysInMonth = new Date(y, mo+1, 0).getDate();
+  // Tính chi thực tế đã có trong tháng
+  let actualExp = 0;
+  db.transactions.forEach(t => {
+    if (t.type !== 'expense') return;
+    const td = pd(t.date);
+    if (td >= monthStart && td < monthEnd) actualExp += t.amount;
+  });
+  if (actualExp === 0) {
+    forecastHtml += '<div style="font-size:12px;color:var(--gray-400);text-align:center;padding:12px;">Chưa có chi tiêu để dự báo</div>';
+  } else {
+    const avgPerDay = actualExp / currentDay;
+    const forecast = Math.round(avgPerDay * daysInMonth);
+    const remaining = forecast - actualExp;
+    if (isCurrentMonth) {
+      forecastHtml += '<div class="forecast-card">'
+        + 'Tốc độ chi hiện tại: <strong>' + fmt(avgPerDay) + '/ngày</strong>.<br>'
+        + 'Dự báo chi cả tháng:'
+        + '<div class="forecast-num">' + fmt(forecast) + '</div>'
+        + 'Đã chi <strong>' + fmt(actualExp) + '</strong> (' + currentDay + '/' + daysInMonth + ' ngày). '
+        + 'Còn lại theo dự báo: <strong>' + fmt(remaining) + '</strong>.'
+        + '</div>';
+    } else {
+      forecastHtml += '<div class="forecast-card">'
+        + 'Tháng đã kết thúc. Tổng chi:'
+        + '<div class="forecast-num">' + fmt(actualExp) + '</div>'
+        + 'Trung bình <strong>' + fmt(avgPerDay) + '/ngày</strong>.'
+        + '</div>';
+    }
+  }
+  forecastHtml += '</div>';
+
+  el.innerHTML = trendHtml + topHtml + walletHtml + forecastHtml;
 }
 
 /* ---------- Khởi động ---------- */

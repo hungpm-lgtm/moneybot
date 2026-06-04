@@ -1103,3 +1103,30 @@ html, body { overflow-x: hidden !important; max-width: 100vw !important; }
 .sync-status-dot.error   { background: var(--pink); }
 .sync-status-dot.local   { background: var(--gray-300); }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ---- Bank preset chips ---- */
+.bank-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 12px;
+  border: 1.5px solid var(--gray-200); background: var(--white);
+  cursor: pointer; font-family: var(--font); font-size: 12px;
+  font-weight: 600; color: var(--gray-700); transition: all 0.15s;
+  white-space: nowrap;
+}
+.bank-chip:active { transform: scale(0.96); border-color: var(--teal); }
+.bank-chip-icon { font-size: 16px; }
+
+/* ---- Wallet type badge (hiện trên wallet chip) ---- */
+.wcc-type {
+  font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.55);
+  line-height: 1; margin-top: 1px;
+}
+
+/* ---- Negative balance warning ---- */
+.neg-balance-alert {
+  background: #FEF0F3; border: 1.5px solid var(--pink);
+  border-radius: var(--radius-sm); padding: 10px 14px;
+  margin: 8px 16px 0; display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 600; color: #C04050;
+  animation: fadeIn 0.3s ease;
+}

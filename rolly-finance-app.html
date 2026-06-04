@@ -408,6 +408,12 @@
       <div class="modal-handle"></div>
       <div class="modal-title" id="walletModalTitle">Cài đặt ví</div>
       <div class="add-tx-form">
+        <!-- Preset ngân hàng VN (chỉ hiện khi tạo mới) -->
+        <div class="form-group" id="bankPresetGroup">
+          <div class="form-label">Chọn nhanh ngân hàng</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;" id="bankPresetList"></div>
+        </div>
+
         <div class="form-group">
           <div class="form-label">Biểu tượng</div>
           <div class="icon-picker" id="walletIconPicker"></div>
@@ -415,6 +421,16 @@
         <div class="form-group">
           <div class="form-label">Tên ví</div>
           <input class="form-input" id="walletName" placeholder="VD: Tiền mặt, Ngân hàng..."/>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Loại ví</div>
+          <select class="form-input" id="walletType">
+            <option value="cash">💵 Tiền mặt</option>
+            <option value="checking">🏦 Tài khoản thanh toán</option>
+            <option value="credit">💳 Thẻ tín dụng</option>
+            <option value="saving">🐷 Tiết kiệm</option>
+            <option value="investment">📈 Đầu tư</option>
+          </select>
         </div>
         <div class="form-group">
           <div class="form-label">Tiền tệ</div>

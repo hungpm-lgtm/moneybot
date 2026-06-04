@@ -25,6 +25,24 @@ const INCOME_CATS = [
   {name:'Khác', icon:'💵', color:'#9CA3AF'},
 ];
 const WALLET_ICONS = ['💼','💵','🏦','💳','👛','🐷','💰','🪙'];
+const WALLET_TYPES = {cash:'Tiền mặt', checking:'TK thanh toán', credit:'Thẻ tín dụng', saving:'Tiết kiệm', investment:'Đầu tư'};
+
+// Preset ngân hàng Việt Nam
+const VN_BANKS = [
+  {name:'Tiền mặt', icon:'💵', type:'cash'},
+  {name:'Vietcombank', icon:'🏦', type:'checking'},
+  {name:'Techcombank', icon:'🏦', type:'checking'},
+  {name:'MB Bank', icon:'💳', type:'checking'},
+  {name:'BIDV', icon:'🏦', type:'checking'},
+  {name:'ACB', icon:'🏦', type:'checking'},
+  {name:'TPBank', icon:'💳', type:'checking'},
+  {name:'VPBank', icon:'🏦', type:'checking'},
+  {name:'Sacombank', icon:'🏦', type:'checking'},
+  {name:'VIB', icon:'💳', type:'checking'},
+  {name:'Agribank', icon:'🏦', type:'checking'},
+  {name:'MoMo', icon:'👛', type:'checking'},
+  {name:'ZaloPay', icon:'👛', type:'checking'},
+];
 const SAVING_ICONS = ['🏖️','📱','🏠','🚗','💍','🎓','💻','✈️','🎁','🐷'];
 
 /* ---------- Lưu trữ ---------- */
@@ -258,13 +276,19 @@ function renderTotalAssets(){
   const row = document.getElementById('walletChipsRow');
   if (!row) return;
   let html = '<div class="wallet-chips-compact">';
+  let negativeWallets = [];
   db.wallets.forEach(w => {
     const bal = walletBalance(w.id);
-    const balColor = bal < 0 ? 'rgba(255,160,160,1)' : '#fff';
+    const isCredit = w.type === 'credit';
+    const isNeg = bal < 0 && !isCredit; // Thẻ tín dụng âm là bình thường
+    if (isNeg) negativeWallets.push(w.name);
+    const balColor = isNeg ? 'rgba(255,160,160,1)' : '#fff';
+    const typeLabel = WALLET_TYPES[w.type] || '';
     html += '<div class="wcc-chip" onclick="openWalletModal(\'' + w.id + '\')">'
       + '<div class="wcc-icon">' + (w.icon||'💼') + '</div>'
       + '<div class="wcc-info">'
       + '<div class="wcc-name">' + esc(w.name) + '</div>'
+      + (typeLabel ? '<div class="wcc-type">' + typeLabel + '</div>' : '')
       + '<div class="wcc-bal" style="color:' + balColor + '">' + fmtShort(bal) + ' ₫</div>'
       + '</div></div>';
   });
@@ -273,6 +297,10 @@ function renderTotalAssets(){
     + '<div class="wcc-info"><div class="wcc-name" style="color:rgba(255,255,255,0.7)">Thêm ví</div></div>'
     + '</div>';
   html += '</div>';
+  // Cảnh báo số dư âm (2.5)
+  if (negativeWallets.length > 0) {
+    html += '<div class="neg-balance-alert">⚠️ Số dư âm: <strong>' + negativeWallets.join(', ') + '</strong> — kiểm tra lại!</div>';
+  }
   row.innerHTML = html;
 }
 
@@ -585,24 +613,51 @@ function openWalletSettings(){
 function openWalletModal(id){
   editingWalletId = id || null;
   const picker = document.getElementById('walletIconPicker');
+  const presetGroup = document.getElementById('bankPresetGroup');
+  const typeSelect = document.getElementById('walletType');
   if (id) {
     const w = db.wallets.find(x => x.id === id);
     walletIconSel = w.icon || '💼';
     document.getElementById('walletName').value = w.name;
     document.getElementById('walletCurrency').value = w.currency || 'VND';
     document.getElementById('walletInitial').value = w.initialBalance || 0;
+    if (typeSelect) typeSelect.value = w.type || 'cash';
     document.getElementById('walletModalTitle').textContent = 'Sửa ví';
     document.getElementById('walletDeleteBtn').style.display = db.wallets.length > 1 ? 'block' : 'none';
+    if (presetGroup) presetGroup.style.display = 'none';
   } else {
     walletIconSel = '💼';
     document.getElementById('walletName').value = '';
     document.getElementById('walletCurrency').value = 'VND';
     document.getElementById('walletInitial').value = 0;
+    if (typeSelect) typeSelect.value = 'cash';
     document.getElementById('walletModalTitle').textContent = 'Thêm ví mới';
     document.getElementById('walletDeleteBtn').style.display = 'none';
+    // Hiện preset ngân hàng VN
+    if (presetGroup) {
+      presetGroup.style.display = 'block';
+      const list = document.getElementById('bankPresetList');
+      if (list) {
+        list.innerHTML = VN_BANKS.map(b =>
+          '<div class="bank-chip" onclick="pickBankPreset(\'' + esc(b.name) + '\',\'' + b.icon + '\',\'' + b.type + '\')">'
+          + '<span class="bank-chip-icon">' + b.icon + '</span>' + esc(b.name) + '</div>'
+        ).join('');
+      }
+    }
   }
   picker.innerHTML = WALLET_ICONS.map(i => '<div class="icon-opt' + (i === walletIconSel ? ' selected' : '') + '" onclick="pickWalletIcon(\'' + i + '\')">' + i + '</div>').join('');
   openModal('modal-wallet');
+}
+function pickBankPreset(name, icon, type){
+  walletIconSel = icon;
+  document.getElementById('walletName').value = name;
+  const typeSelect = document.getElementById('walletType');
+  if (typeSelect) typeSelect.value = type;
+  // Cập nhật icon picker
+  document.querySelectorAll('#walletIconPicker .icon-opt').forEach(el =>
+    el.classList.toggle('selected', el.textContent === icon)
+  );
+  showToast('✓ Đã chọn ' + icon + ' ' + name);
 }
 function pickWalletIcon(i){ walletIconSel = i; document.querySelectorAll('#walletIconPicker .icon-opt').forEach(el => el.classList.toggle('selected', el.textContent === i)); }
 function submitWallet(){
@@ -610,11 +665,12 @@ function submitWallet(){
   if (!name) { showToast('Vui lòng nhập tên ví!'); return; }
   const currency = document.getElementById('walletCurrency').value;
   const initialBalance = parseFloat(document.getElementById('walletInitial').value) || 0;
+  const type = (document.getElementById('walletType') || {}).value || 'cash';
   if (editingWalletId) {
     const w = db.wallets.find(x => x.id === editingWalletId);
-    Object.assign(w, { name, icon:walletIconSel, currency, initialBalance });
+    Object.assign(w, { name, icon:walletIconSel, currency, initialBalance, type });
   } else {
-    const w = { id:uid(), name, icon:walletIconSel, currency, initialBalance };
+    const w = { id:uid(), name, icon:walletIconSel, currency, initialBalance, type };
     db.wallets.push(w); db.settings.activeWalletId = w.id;
   }
   saveDB(); closeModal('modal-wallet'); renderAll(); showToast('💾 Đã lưu ví');

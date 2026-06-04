@@ -1,6 +1,9 @@
 {
   "rewrites": [
     { "source": "/quick", "destination": "/quick-add.html" },
+    { "source": "/zap", "destination": "/zap.html" },
+    { "source": "/zap-builder", "destination": "/zap-builder.html" },
+    { "source": "/builder", "destination": "/zap-builder.html" },
     { "source": "/", "destination": "/rolly-finance-app.html" }
   ]
 }

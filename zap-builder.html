@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#3D7D78">
+<title>Tạo lối tắt nhanh</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family:'Be Vietnam Pro',sans-serif; background:#EDE7DC; color:#282018;
+  min-height:100dvh; padding:0 0 40px;
+}
+.header {
+  background:linear-gradient(135deg,#3D7D78 0%,#5EA09B 100%); color:#fff;
+  padding:calc(env(safe-area-inset-top,0px)+18px) 20px 18px;
+}
+.header h1 { font-size:18px; margin-bottom:4px; }
+.header p { font-size:12px; opacity:0.85; }
+.back-btn { color:#fff; font-size:13px; text-decoration:none; opacity:0.85; }
+
+.container { padding:16px; max-width:560px; margin:0 auto; }
+.section { background:#fff; border-radius:16px; padding:16px; margin-bottom:14px; box-shadow:0 2px 10px rgba(80,65,50,0.08); }
+.section h3 { font-size:13px; color:#787068; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.6px; }
+.field { margin-bottom:12px; }
+label { font-size:11px; font-weight:700; color:#787068; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px; }
+input, select {
+  width:100%; padding:10px 12px; background:#F4EFE8; border:2px solid transparent;
+  border-radius:12px; font-family:inherit; font-size:14px; outline:none;
+}
+input:focus, select:focus { border-color:#5EA09B; background:#fff; }
+.cat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+.cat-btn {
+  background:#F4EFE8; border:2px solid transparent; border-radius:10px;
+  padding:8px 4px; display:flex; flex-direction:column; align-items:center; gap:2px;
+  cursor:pointer;
+}
+.cat-btn.selected { background:#E4F3F2; border-color:#5EA09B; }
+.cat-btn .ic { font-size:20px; }
+.cat-btn .nm { font-size:9px; color:#787068; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+
+.preset-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.preset-btn {
+  padding:6px 12px; background:#F4EFE8; border:1.5px solid transparent;
+  border-radius:10px; font-family:inherit; font-size:12px; font-weight:700;
+  color:#484038; cursor:pointer;
+}
+.preset-btn:hover { background:#E4F3F2; border-color:#5EA09B; }
+
+.url-output {
+  background:#282018; color:#A8E6E1; padding:12px; border-radius:12px;
+  font-family:monospace; font-size:11px; word-break:break-all; line-height:1.5;
+  margin-top:8px; user-select:all;
+}
+.btn-row { display:flex; gap:8px; margin-top:12px; }
+.btn {
+  flex:1; padding:12px; background:linear-gradient(135deg,#60AAA5,#3D7D78);
+  color:#fff; border:none; border-radius:12px; font-family:inherit;
+  font-size:14px; font-weight:700; cursor:pointer;
+}
+.btn-secondary { background:#F4EFE8; color:#3D7D78; }
+
+.guide-step {
+  background:#F4EFE8; border-left:3px solid #5EA09B; padding:10px 14px;
+  border-radius:8px; margin-bottom:8px; font-size:13px; color:#484038;
+}
+.guide-step strong { color:#3D7D78; }
+.guide-tab { display:flex; gap:8px; margin-bottom:12px; }
+.guide-tab button {
+  flex:1; padding:8px; background:#F4EFE8; border:1.5px solid transparent;
+  border-radius:10px; font-family:inherit; font-weight:700; cursor:pointer;
+}
+.guide-tab button.active { background:#5EA09B; color:#fff; }
+.guide-body { display:none; }
+.guide-body.active { display:block; }
+
+.preview-card {
+  background:linear-gradient(135deg,#3D7D78 0%,#5EA09B 100%); color:#fff;
+  padding:16px; border-radius:14px; text-align:center; margin-top:12px;
+}
+.preview-icon { font-size:40px; }
+.preview-title { font-size:14px; font-weight:700; margin-top:6px; }
+.preview-amt { font-size:22px; font-weight:800; margin-top:4px; }
+.preview-detail { font-size:11px; opacity:0.85; margin-top:4px; }
+
+.qr-wrap { display:flex; justify-content:center; padding:12px; background:#fff; border-radius:12px; margin-top:8px; }
+.qr-wrap img { max-width:200px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="rolly-finance-app.html" class="back-btn">‹ App</a>
+  <h1>⚡ Tạo lối tắt 1-tap</h1>
+  <p>Tạo URL lưu giao dịch tức thì để add vào màn hình chính</p>
+</div>
+
+<div class="container">
+
+  <!-- Form tạo URL -->
+  <div class="section">
+    <h3>1. Cài đặt lối tắt</h3>
+
+    <div class="field">
+      <label>Ví trừ tiền</label>
+      <select id="walletSelect">
+        <option value="active">📍 Ví đang dùng (tự động)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Danh mục</label>
+      <div class="cat-grid" id="catGrid"></div>
+    </div>
+
+    <div class="field">
+      <label>Số tiền (₫)</label>
+      <input type="text" id="amtInput" inputmode="numeric" placeholder="VD: 50000" autocomplete="off"/>
+      <div class="preset-row">
+        <button class="preset-btn" onclick="setAmt(20000)">20k</button>
+        <button class="preset-btn" onclick="setAmt(30000)">30k</button>
+        <button class="preset-btn" onclick="setAmt(50000)">50k</button>
+        <button class="preset-btn" onclick="setAmt(100000)">100k</button>
+        <button class="preset-btn" onclick="setAmt(200000)">200k</button>
+        <button class="preset-btn" onclick="setAmt(500000)">500k</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Ghi chú (tuỳ chọn)</label>
+      <input type="text" id="noteInput" placeholder="VD: Ăn trưa, Cafe sáng..."/>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="section">
+    <h3>2. Xem trước</h3>
+    <div class="preview-card" id="previewCard">
+      <div class="preview-icon">❓</div>
+      <div class="preview-title">Chưa đủ thông tin</div>
+    </div>
+
+    <div class="url-output" id="urlOutput">Chọn danh mục và số tiền để tạo URL...</div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="copyURL()">📋 Sao chép URL</button>
+      <button class="btn btn-secondary" onclick="openURL()">🧪 Thử ngay</button>
+    </div>
+  </div>
+
+  <!-- Hướng dẫn -->
+  <div class="section">
+    <h3>3. Cách add vào màn hình chính</h3>
+    <div class="guide-tab">
+      <button class="active" onclick="setGuide('ios')">📱 iPhone</button>
+      <button onclick="setGuide('android')">🤖 Android</button>
+    </div>
+
+    <div class="guide-body active" id="guide-ios">
+      <p style="font-size:13px;margin-bottom:10px;"><strong>Cách 1 — Bookmark đơn giản (1 tap):</strong></p>
+      <div class="guide-step">1. Sao chép URL ở trên</div>
+      <div class="guide-step">2. Mở <strong>Safari</strong> → dán URL → mở</div>
+      <div class="guide-step">3. Bấm nút chia sẻ <strong>⬆️</strong> → <strong>"Thêm vào Màn hình chính"</strong></div>
+      <div class="guide-step">4. Đặt tên ngắn gọn (VD: "Ăn 50k") → <strong>Thêm</strong></div>
+      <div class="guide-step">✅ Từ giờ bấm icon trên màn hình = lưu giao dịch ngay</div>
+
+      <p style="font-size:13px;margin:14px 0 10px;"><strong>Cách 2 — Widget thật (cần Shortcuts.app):</strong></p>
+      <div class="guide-step">1. Mở app <strong>"Phím tắt"</strong> (Shortcuts) của Apple</div>
+      <div class="guide-step">2. Tab "Phím tắt của tôi" → <strong>+</strong> → <strong>Thêm hành động</strong></div>
+      <div class="guide-step">3. Tìm <strong>"Mở URL"</strong> → dán URL ở trên</div>
+      <div class="guide-step">4. Bấm tên Shortcut → đặt tên (VD: "Ăn 50k") → chọn icon ☕🍽️</div>
+      <div class="guide-step">5. Ra màn hình chính → giữ → <strong>+</strong> → tìm <strong>"Phím tắt"</strong> → chọn widget → Add Widget</div>
+      <div class="guide-step">6. Bấm vào widget để chọn Shortcut vừa tạo</div>
+      <div class="guide-step">✅ Giờ có widget thật trên homescreen</div>
+    </div>
+
+    <div class="guide-body" id="guide-android">
+      <p style="font-size:13px;margin-bottom:10px;"><strong>Cách 1 — Long-press icon app (đề xuất):</strong></p>
+      <div class="guide-step">Sau khi cài MoneyBot làm PWA → <strong>giữ icon MoneyBot</strong> → hiện menu với các lối tắt sẵn (Ăn 50k, Cafe 30k...).</div>
+
+      <p style="font-size:13px;margin:14px 0 10px;"><strong>Cách 2 — Bookmark từng URL:</strong></p>
+      <div class="guide-step">1. Sao chép URL ở trên</div>
+      <div class="guide-step">2. Mở <strong>Chrome</strong> → dán URL → mở</div>
+      <div class="guide-step">3. Menu 3 chấm <strong>⋮</strong> → <strong>"Thêm vào màn hình chính"</strong></div>
+      <div class="guide-step">4. Đặt tên ngắn gọn → <strong>Thêm</strong></div>
+      <div class="guide-step">✅ Bấm icon trên màn hình = lưu ngay</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const STORE_KEY = 'moneybot_v1';
+const DEFAULT_CATS = [
+  {name:'Thức ăn & Đồ uống', icon:'🍽️'},{name:'Giao thông', icon:'⛽'},
+  {name:'Nhà', icon:'🏠'},{name:'Giải trí', icon:'🎮'},
+  {name:'Mua sắm', icon:'🛍️'},{name:'Quà tặng', icon:'🎁'},
+  {name:'Làm đẹp', icon:'💄'},{name:'Y tế', icon:'🏥'},
+  {name:'Học tập', icon:'📚'},{name:'Hóa đơn', icon:'🧾'},{name:'Khác', icon:'📦'},
+];
+let db = null;
+let selCat = null, selCatIcon = '';
+
+function loadDB(){
+  try { const r = localStorage.getItem(STORE_KEY); if (r) db = JSON.parse(r); } catch(e){}
+  if (!db) db = {wallets:[],categories:{expense:DEFAULT_CATS},settings:{}};
+  db.wallets = db.wallets || [];
+  db.categories = db.categories || {expense:DEFAULT_CATS};
+  if (!db.categories.expense || !db.categories.expense.length) db.categories.expense = DEFAULT_CATS;
+}
+function renderWallets(){
+  const sel = document.getElementById('walletSelect');
+  sel.innerHTML = '<option value="active">📍 Ví đang dùng (tự động)</option>'
+    + db.wallets.map(w => `<option value="${w.id}">${w.icon||'💼'} ${w.name}</option>`).join('');
+}
+function renderCats(){
+  const cats = db.categories.expense || DEFAULT_CATS;
+  document.getElementById('catGrid').innerHTML = cats.map(c =>
+    `<div class="cat-btn ${selCat===c.name?'selected':''}" onclick="pickCat('${encodeURIComponent(c.name)}','${encodeURIComponent(c.icon)}')">
+      <div class="ic">${c.icon}</div><div class="nm">${c.name}</div>
+    </div>`
+  ).join('');
+}
+function pickCat(enc, iconEnc){
+  selCat = decodeURIComponent(enc);
+  selCatIcon = decodeURIComponent(iconEnc);
+  renderCats(); update();
+}
+function setAmt(n){ document.getElementById('amtInput').value = n; update(); }
+
+document.getElementById('amtInput').addEventListener('input', update);
+document.getElementById('noteInput').addEventListener('input', update);
+document.getElementById('walletSelect').addEventListener('change', update);
+
+function buildURL(){
+  const w = document.getElementById('walletSelect').value;
+  const amt = parseInt((document.getElementById('amtInput').value||'').replace(/\D/g,''),10);
+  const note = document.getElementById('noteInput').value.trim();
+  if (!selCat || !amt) return null;
+  const base = location.origin + '/zap.html';
+  const params = new URLSearchParams();
+  if (w && w !== 'active') params.set('w', w);
+  params.set('c', selCat);
+  params.set('a', amt);
+  if (note) params.set('note', note);
+  return base + '?' + params.toString();
+}
+
+function update(){
+  const url = buildURL();
+  const out = document.getElementById('urlOutput');
+  const card = document.getElementById('previewCard');
+  if (!url) {
+    out.textContent = 'Chọn danh mục và số tiền để tạo URL...';
+    card.innerHTML = '<div class="preview-icon">❓</div><div class="preview-title">Chưa đủ thông tin</div>';
+    return;
+  }
+  out.textContent = url;
+  const amt = parseInt(document.getElementById('amtInput').value.replace(/\D/g,''),10);
+  const note = document.getElementById('noteInput').value.trim();
+  const fmt = n => '₫'+n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  card.innerHTML = `
+    <div class="preview-icon">${selCatIcon}</div>
+    <div class="preview-title">${selCat}</div>
+    <div class="preview-amt">−${fmt(amt)}</div>
+    <div class="preview-detail">${note?note+' · ':''}lưu vào ví đang dùng</div>
+  `;
+}
+
+function copyURL(){
+  const url = buildURL();
+  if (!url) { alert('Vui lòng chọn danh mục và nhập số tiền!'); return; }
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => alert('✓ Đã sao chép URL — paste vào trình duyệt để add màn hình chính'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    alert('✓ Đã sao chép URL');
+  }
+}
+function openURL(){
+  const url = buildURL();
+  if (!url) { alert('Vui lòng chọn danh mục và nhập số tiền!'); return; }
+  window.open(url, '_blank');
+}
+function setGuide(p){
+  document.querySelectorAll('.guide-tab button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.guide-body').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('guide-'+p).classList.add('active');
+}
+
+// Init
+loadDB();
+renderWallets();
+renderCats();
+update();
+</script>
+</body>
+</html>

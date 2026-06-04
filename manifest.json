@@ -1,0 +1,44 @@
+{
+  "name": "MoneyBot — Chi tiêu cá nhân",
+  "short_name": "MoneyBot",
+  "description": "Theo dõi chi tiêu, đa ví, đồng bộ cloud",
+  "start_url": "/rolly-finance-app.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#EDE7DC",
+  "theme_color": "#3D7D78",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Ghi nhanh",
+      "short_name": "Ghi nhanh",
+      "description": "Mở giao diện ghi giao dịch siêu nhanh",
+      "url": "/quick-add.html",
+      "icons": [{ "src": "icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "🍽️ Ăn trưa 50k",
+      "short_name": "Ăn 50k",
+      "description": "Lưu ngay 50.000₫ vào Thức ăn & Đồ uống (ví đang dùng)",
+      "url": "/zap.html?c=Th%E1%BB%A9c%20%C4%83n%20%26%20%C4%90%E1%BB%93%20u%E1%BB%91ng&a=50000&note=%C4%82n%20tr%C6%B0a",
+      "icons": [{ "src": "icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "☕ Cafe 30k",
+      "short_name": "Cafe 30k",
+      "description": "Lưu ngay 30.000₫ vào Thức ăn & Đồ uống",
+      "url": "/zap.html?c=Th%E1%BB%A9c%20%C4%83n%20%26%20%C4%90%E1%BB%93%20u%E1%BB%91ng&a=30000&note=Cafe",
+      "icons": [{ "src": "icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "⛽ Đổ xăng 100k",
+      "short_name": "Xăng 100k",
+      "description": "Lưu ngay 100.000₫ vào Giao thông",
+      "url": "/zap.html?c=Giao%20th%C3%B4ng&a=100000&note=%C4%90%E1%BB%95%20x%C4%83ng",
+      "icons": [{ "src": "icon.svg", "sizes": "any" }]
+    }
+  ]
+}

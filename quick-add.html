@@ -32,24 +32,44 @@ body {
   position: fixed; inset: 0; overflow: hidden;
 }
 
-/* ── Header ── */
-.header {
+/* ── Top bar: chỉ chứa nút Lưu góc phải ── */
+.topbar {
+  position: absolute; top: 0; left: 0; right: 0;
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) 14px 0;
+  display: flex; justify-content: flex-end; z-index: 5;
+  pointer-events: none;
+}
+.save-corner {
+  pointer-events: auto;
+  background: linear-gradient(135deg, #60AAA5 0%, #3D7D78 100%);
+  color: #fff; border: none;
+  font-family: var(--font); font-size: 16px; font-weight: 800;
+  padding: 10px 20px; border-radius: 16px; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(61,125,120,0.40);
+  transition: transform 0.15s, opacity 0.2s;
+}
+.save-corner:active { transform: scale(0.95); }
+.save-corner:disabled {
+  background: var(--gray-lite); color: var(--gray);
+  box-shadow: none; cursor: not-allowed; opacity: 0.6;
+}
+
+/* ── Footer: tiêu đề + sync + app link ở dưới ── */
+.footer-bar {
   background: linear-gradient(150deg, #3D7D78 0%, #5EA09B 100%);
-  padding-top: calc(env(safe-area-inset-top, 0px) + 10px);
-  padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px 12px;
+  padding: 10px 16px calc(env(safe-area-inset-bottom, 0px) + 10px);
   display: flex; align-items: center; justify-content: space-between;
-  position: relative; overflow: hidden; flex-shrink: 0;
+  flex-shrink: 0; position: relative; overflow: hidden;
 }
-.header::before {
-  content:''; position:absolute; width:140px; height:140px;
-  background:rgba(255,255,255,0.08); border-radius:50%;
-  top:-60px; right:-30px;
+.footer-bar::before {
+  content:''; position:absolute; width:120px; height:120px;
+  background:rgba(255,255,255,0.06); border-radius:50%;
+  bottom:-50px; right:-20px;
 }
-.header-left { display:flex; align-items:center; gap:8px; position:relative; z-index:1; }
-.header-icon { width:34px; height:34px; background:rgba(255,255,255,0.20); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
-.header-title { font-size:15px; font-weight:800; color:#fff; line-height:1.1; }
-.header-sub { font-size:10px; color:rgba(255,255,255,0.7); margin-top:1px; }
-.header-right { display:flex; align-items:center; gap:6px; position:relative; z-index:1; }
+.footer-left { display:flex; align-items:center; gap:8px; position:relative; z-index:1; }
+.footer-title { font-size:14px; font-weight:800; color:#fff; line-height:1.1; }
+.footer-sub { font-size:10px; color:rgba(255,255,255,0.65); margin-top:1px; }
+.footer-right { display:flex; align-items:center; gap:6px; position:relative; z-index:1; }
 .sync-badge {
   display:flex; align-items:center; gap:4px;
   background:rgba(255,255,255,0.16); border:1px solid rgba(255,255,255,0.25);
@@ -62,18 +82,16 @@ body {
 .sync-dot.error { background:#E4969E; }
 .sync-dot.offline { background:#9CA3AF; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-.open-app-btn, .save-corner {
+.open-app-btn {
   background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.3);
   color:#fff; font-family:var(--font); font-size:11px; font-weight:700;
   padding:5px 10px; border-radius:14px; text-decoration:none;
   backdrop-filter:blur(8px); cursor:pointer;
 }
-.save-corner { background:#fff; color:var(--teal-dark); border-color:#fff; }
-.save-corner:disabled { opacity:0.5; cursor:not-allowed; }
 
 /* ── Content (no scroll, fit screen) ── */
 .content {
-  flex:1; padding:10px 14px 12px;
+  flex:1; padding:calc(env(safe-area-inset-top, 0px) + 56px) 14px 12px;
   display:flex; flex-direction:column; gap:10px;
   overflow-y:auto; scrollbar-width:none;
 }
@@ -83,21 +101,21 @@ body {
   letter-spacing:0.6px; text-transform:uppercase; margin-bottom:5px;
 }
 
-/* ── Wallet chips ── */
+/* ── Wallet chips (không icon, gọn) ── */
 .wallet-row { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; }
 .wallet-row::-webkit-scrollbar { display:none; }
 .w-chip {
   flex-shrink:0; padding:8px 12px; border-radius:12px;
   background:var(--white); border:2px solid transparent;
-  display:flex; align-items:center; gap:6px; cursor:pointer;
+  display:flex; flex-direction:column; line-height:1.1; cursor:pointer;
   box-shadow:0 1px 6px rgba(80,65,50,0.06); transition:all 0.15s;
+  min-width:0;
 }
 .w-chip:active { transform:scale(0.96); }
 .w-chip.selected { border-color:var(--teal); background:var(--teal-lite); }
-.w-chip-icon { font-size:16px; }
-.w-chip-info { display:flex; flex-direction:column; line-height:1.1; }
-.w-chip-name { font-size:11px; font-weight:700; color:var(--text); white-space:nowrap; max-width:90px; overflow:hidden; text-overflow:ellipsis; }
-.w-chip-bal { font-size:10px; font-weight:600; color:var(--gray); margin-top:1px; }
+.w-chip-name { font-size:12px; font-weight:700; color:var(--text); white-space:nowrap; max-width:110px; overflow:hidden; text-overflow:ellipsis; }
+.w-chip-bal { font-size:10px; font-weight:600; color:var(--gray); margin-top:2px; }
+.w-chip.selected .w-chip-name { color:var(--teal-dark); }
 
 /* ── Category grid (4 cols, compact) ── */
 .cat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
@@ -188,19 +206,9 @@ body {
 </head>
 <body>
 
-<div class="header">
-  <div class="header-left">
-    <div class="header-icon">⚡</div>
-    <div>
-      <div class="header-title">Ghi nhanh</div>
-      <div class="header-sub" id="autoSub">Tự lưu khi đủ thông tin</div>
-    </div>
-  </div>
-  <div class="header-right">
-    <div class="sync-badge" id="syncBadge"><div class="sync-dot offline"></div><span>...</span></div>
-    <button class="save-corner" id="saveBtn" onclick="save()" disabled>✓ Lưu</button>
-    <a href="rolly-finance-app.html" class="open-app-btn">App↗</a>
-  </div>
+<!-- Top bar: chỉ nút Lưu góc phải -->
+<div class="topbar">
+  <button class="save-corner" id="saveBtn" onclick="save()" disabled>Lưu</button>
 </div>
 
 <div class="loading-overlay" id="loadingOverlay">
@@ -229,6 +237,9 @@ body {
       <input class="amount-input" id="amtInput" type="text" inputmode="numeric" placeholder="000" autocomplete="off" value="000"/>
     </div>
     <div class="quick-amts">
+      <button class="qa-btn" type="button" onclick="addAmt(1000)">+1k</button>
+      <button class="qa-btn" type="button" onclick="addAmt(2000)">+2k</button>
+      <button class="qa-btn" type="button" onclick="addAmt(5000)">+5k</button>
       <button class="qa-btn" type="button" onclick="addAmt(10000)">+10k</button>
       <button class="qa-btn" type="button" onclick="addAmt(20000)">+20k</button>
       <button class="qa-btn" type="button" onclick="addAmt(50000)">+50k</button>
@@ -244,6 +255,20 @@ body {
   <!-- Auto-save indicator -->
   <div class="auto-hint" id="autoHint">⌛ Chọn ví + danh mục + số tiền để tự lưu</div>
 
+</div>
+
+<!-- Footer bar: tiêu đề + sync + app -->
+<div class="footer-bar">
+  <div class="footer-left">
+    <div>
+      <div class="footer-title">Ghi nhanh</div>
+      <div class="footer-sub" id="autoSub">Tự lưu sau 2 giây</div>
+    </div>
+  </div>
+  <div class="footer-right">
+    <div class="sync-badge" id="syncBadge"><div class="sync-dot offline"></div><span>...</span></div>
+    <a href="rolly-finance-app.html" class="open-app-btn">App↗</a>
+  </div>
 </div>
 
 <!-- Success overlay -->
@@ -333,11 +358,8 @@ function renderWallets(){
   row.innerHTML = db.wallets.map(w => {
     const bal = walletBalance(w.id);
     return `<div class="w-chip ${selWalletId===w.id?'selected':''}" onclick="selWallet('${w.id}')">
-      <span class="w-chip-icon">${w.icon||'💼'}</span>
-      <div class="w-chip-info">
-        <div class="w-chip-name">${w.name}</div>
-        <div class="w-chip-bal">${fmtShort(bal)} ₫</div>
-      </div>
+      <div class="w-chip-name">${w.name}</div>
+      <div class="w-chip-bal">${fmtShort(bal)} ₫</div>
     </div>`;
   }).join('');
 }
@@ -423,11 +445,11 @@ function checkAutoSave(){
     hint.textContent = '⌛ Chưa đủ: ' + missing.join(', ');
     hint.className = 'auto-hint';
   } else {
-    hint.textContent = '✓ Sẵn sàng — tự lưu sau 1s, hoặc bấm Lưu';
+    hint.textContent = '✓ Sẵn sàng — tự lưu sau 2 giây, hoặc bấm Lưu';
     hint.className = 'auto-hint ready';
-    // Debounce auto-save
+    // Debounce auto-save: 2 giây
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
-    autoSaveTimer = setTimeout(() => save(), 1000);
+    autoSaveTimer = setTimeout(() => save(), 2000);
   }
 }
 

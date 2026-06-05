@@ -202,6 +202,41 @@ body {
   animation:spin 0.7s linear infinite; margin-bottom:8px;
 }
 @keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── Settings popup ── */
+.footer-sub { cursor: pointer; text-decoration: underline; text-decoration-color: rgba(255,255,255,0.30); text-underline-offset: 2px; }
+.footer-sub:active { color: rgba(255,255,255,0.95); }
+.settings-popup {
+  position: fixed; inset: 0; background: rgba(40,32,24,0.55);
+  display: none; align-items: center; justify-content: center;
+  z-index: 1000; padding: 20px; backdrop-filter: blur(4px);
+}
+.settings-popup.show { display: flex; }
+.settings-sheet {
+  background: #fff; border-radius: 20px; padding: 20px;
+  max-width: 360px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.settings-sheet h3 {
+  font-size: 16px; color: var(--text); margin-bottom: 4px;
+}
+.settings-sheet p { font-size: 12px; color: var(--gray); margin-bottom: 16px; }
+.delay-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.delay-btn {
+  padding: 12px 8px; border-radius: 12px;
+  background: var(--gray-lite); border: 2px solid transparent;
+  font-family: var(--font); font-size: 13px; font-weight: 700;
+  color: var(--gray); cursor: pointer; transition: all 0.15s;
+}
+.delay-btn:active { transform: scale(0.95); }
+.delay-btn.selected { background: var(--teal-lite); border-color: var(--teal); color: var(--teal-dark); }
+.delay-btn.off { color: #C04050; }
+.delay-btn.off.selected { background: #FEF0F3; border-color: var(--pink); color: #C04050; }
+.settings-close {
+  margin-top: 14px; width: 100%; padding: 12px;
+  background: var(--teal-dark); color: #fff; border: none;
+  border-radius: 12px; font-family: var(--font);
+  font-size: 14px; font-weight: 700; cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -264,12 +299,22 @@ body {
   <div class="footer-left">
     <div>
       <div class="footer-title">Ghi nhanh</div>
-      <div class="footer-sub" id="autoSub">Tự lưu sau 1.5 giây</div>
+      <div class="footer-sub" id="autoSub" onclick="openDelaySettings()">⚙️ Tự lưu sau 1.5 giây</div>
     </div>
   </div>
   <div class="footer-right">
     <div class="sync-badge" id="syncBadge"><div class="sync-dot offline"></div><span>...</span></div>
     <a href="rolly-finance-app.html" class="open-app-btn">App↗</a>
+  </div>
+</div>
+
+<!-- Settings popup: chỉnh thời gian tự lưu -->
+<div class="settings-popup" id="delayPopup" onclick="closeDelaySettings()">
+  <div class="settings-sheet" onclick="event.stopPropagation()">
+    <h3>⏱️ Thời gian tự lưu</h3>
+    <p>Sau khi đủ thông tin, app sẽ chờ bao lâu rồi tự lưu giao dịch?</p>
+    <div class="delay-grid" id="delayGrid"></div>
+    <button class="settings-close" onclick="closeDelaySettings()">Xong</button>
   </div>
 </div>
 
@@ -311,6 +356,17 @@ let selWalletId = null;
 let selCat = null, selCatIcon = '';
 let autoSaveTimer = null;
 let isSaving = false;
+let autoSaveDelayMs = 1500; // ms — load từ db.settings sau khi loadDB
+
+// Preset thời gian tự lưu (ms). 0 = tắt
+const DELAY_PRESETS = [
+  { ms: 0, label: 'Tắt' },
+  { ms: 500, label: '0.5s' },
+  { ms: 1000, label: '1s' },
+  { ms: 1500, label: '1.5s' },
+  { ms: 2000, label: '2s' },
+  { ms: 3000, label: '3s' },
+];
 
 /* ── Utils ── */
 function pad(n){ return n<10?'0'+n:''+n; }
@@ -351,6 +407,10 @@ function loadDB(){
     db.wallets.push(w); db.settings.activeWalletId = w.id;
   }
   selWalletId = db.settings.activeWalletId || db.wallets[0].id;
+  // Load quick-add settings
+  if (typeof db.settings.quickSaveDelayMs === 'number') {
+    autoSaveDelayMs = db.settings.quickSaveDelayMs;
+  }
 }
 function saveDB(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(db)); } catch(e){} }
 
@@ -447,11 +507,17 @@ function checkAutoSave(){
     hint.textContent = '⌛ Chưa đủ: ' + missing.join(', ');
     hint.className = 'auto-hint';
   } else {
-    hint.textContent = '✓ Sẵn sàng — tự lưu sau 1.5 giây, hoặc bấm Lưu';
     hint.className = 'auto-hint ready';
-    // Debounce auto-save: 1.5 giây
-    if (autoSaveTimer) clearTimeout(autoSaveTimer);
-    autoSaveTimer = setTimeout(() => save(), 1500);
+    if (autoSaveDelayMs <= 0) {
+      hint.textContent = '✓ Sẵn sàng — bấm Lưu để ghi (tự lưu đã tắt)';
+      if (autoSaveTimer) { clearTimeout(autoSaveTimer); autoSaveTimer = null; }
+    } else {
+      const delaySec = (autoSaveDelayMs / 1000).toString().replace('.', ',');
+      hint.textContent = '✓ Sẵn sàng — tự lưu sau ' + delaySec + ' giây, hoặc bấm Lưu';
+      // Debounce auto-save
+      if (autoSaveTimer) clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(() => save(), autoSaveDelayMs);
+    }
   }
 }
 
@@ -556,11 +622,49 @@ function initFirebase(){
   } catch(e) { _syncStatus = 'error'; updateSyncBadge(); }
 }
 
+/* ── Settings popup: thời gian tự lưu ── */
+function renderDelaySettings(){
+  const grid = document.getElementById('delayGrid');
+  if (!grid) return;
+  grid.innerHTML = DELAY_PRESETS.map(p => {
+    const isOff = p.ms === 0;
+    const selected = autoSaveDelayMs === p.ms;
+    return `<button class="delay-btn${isOff?' off':''}${selected?' selected':''}" onclick="pickDelay(${p.ms})">${p.label}</button>`;
+  }).join('');
+  // Cập nhật text dưới footer
+  const sub = document.getElementById('autoSub');
+  if (sub) {
+    if (autoSaveDelayMs <= 0) sub.textContent = '⚙️ Tự lưu: TẮT';
+    else {
+      const s = (autoSaveDelayMs/1000).toString().replace('.', ',');
+      sub.textContent = '⚙️ Tự lưu sau ' + s + ' giây';
+    }
+  }
+}
+function openDelaySettings(){
+  renderDelaySettings();
+  document.getElementById('delayPopup').classList.add('show');
+}
+function closeDelaySettings(){
+  document.getElementById('delayPopup').classList.remove('show');
+}
+function pickDelay(ms){
+  autoSaveDelayMs = ms;
+  db.settings = db.settings || {};
+  db.settings.quickSaveDelayMs = ms;
+  saveDB();
+  // Đồng bộ lên cloud nếu đã login
+  if (fbUser && typeof pushCloud === 'function') pushCloud();
+  renderDelaySettings();
+  checkAutoSave();
+}
+
 /* ── Khởi động ── */
 loadDB();
 renderWallets();
 renderCats();
 updateSyncBadge();
+renderDelaySettings();
 checkAutoSave();
 initFirebase();
 </script>

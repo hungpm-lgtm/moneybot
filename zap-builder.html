@@ -141,51 +141,90 @@ input:focus, select:focus { border-color:#5EA09B; background:#fff; }
       <div class="preview-icon">❓</div>
       <div class="preview-title">Chưa đủ thông tin</div>
     </div>
+  </div>
 
+  <!-- ========== CÁCH C: Widget iOS (linh hoạt) ========== -->
+  <div class="section" style="border:2px solid #5EA09B;">
+    <h3 style="color:#3D7D78;">🎯 Cách C — Widget iOS hỏi tiền mỗi lần (ĐỀ XUẤT)</h3>
+    <p style="font-size:12px;color:#787068;margin-bottom:10px;line-height:1.5;">
+      Tạo 1 widget trên homescreen. Bấm widget → iPhone hỏi "Bao nhiêu tiền?" → bạn nhập → tự lưu.
+      <strong>Số tiền không cố định</strong> — phù hợp danh mục bạn chi tiền khác nhau mỗi lần.
+    </p>
+
+    <label>URL base (cho Shortcuts — KHÔNG có số tiền)</label>
+    <div class="url-output" id="baseURLOutput">Chọn danh mục trước...</div>
+    <div class="btn-row">
+      <button class="btn" onclick="copyBaseURL()">📋 Sao chép URL base</button>
+    </div>
+
+    <p style="font-size:13px;margin:18px 0 8px;color:#3D7D78;font-weight:700;">📲 Hướng dẫn cài Shortcut + Widget:</p>
+    <div class="guide-step">
+      <strong>Bước 1.</strong> Mở app <strong>"Phím tắt"</strong> (Shortcuts) — icon ô vuông tím Apple cài sẵn
+    </div>
+    <div class="guide-step">
+      <strong>Bước 2.</strong> Bấm tab <strong>"Phím tắt của tôi"</strong> → bấm <strong>+</strong> góc trên phải
+    </div>
+    <div class="guide-step">
+      <strong>Bước 3.</strong> Bấm <strong>"Thêm Hành Động"</strong> (Add Action) → ô tìm kiếm gõ <strong>"yêu cầu nhập"</strong> (hoặc tiếng Anh: <strong>"Ask for Input"</strong>) → chọn nó
+    </div>
+    <div class="guide-step">
+      <strong>Bước 4.</strong> Ở hành động vừa thêm:<br>
+      • Trường <strong>"Câu hỏi"</strong>: nhập <em>"Bao nhiêu tiền?"</em><br>
+      • Bấm vào <strong>"Văn bản"</strong> ở giữa → đổi thành <strong>"Số" (Number)</strong>
+    </div>
+    <div class="guide-step">
+      <strong>Bước 5.</strong> Bấm <strong>"Thêm Hành Động"</strong> lần nữa → gõ <strong>"mở URL"</strong> (hoặc <strong>"Open URL"</strong>) → chọn
+    </div>
+    <div class="guide-step">
+      <strong>Bước 6.</strong> Ô URL: <strong>sao chép URL base ở trên rồi dán vào</strong>. URL kết thúc bằng <code>&a=</code><br>
+      <em>Bấm vào CUỐI URL</em> (sau dấu <code>=</code>) → trên bàn phím sẽ có thanh gợi ý chứa <strong>"Provided Input"</strong> (hộp xanh) → bấm để chèn
+    </div>
+    <div class="guide-step">
+      <strong>Bước 7.</strong> Bấm tên Shortcut ở trên cùng (mặc định "Phím tắt mới") → đặt tên ngắn, VD: <strong>"🍽️ Ăn"</strong> → chọn màu + biểu tượng
+    </div>
+    <div class="guide-step">
+      <strong>Bước 8.</strong> Bấm <strong>"Xong"</strong> ✓ — Shortcut đã tạo xong. Thử bấm vào nó để test
+    </div>
+    <div class="guide-step" style="background:#FFF9E6;border-color:#F5C97A;">
+      <strong>Bước 9 — Đặt làm widget trên homescreen:</strong><br>
+      • Ra màn hình chính → giữ vùng trống → góc trên trái bấm <strong>+</strong><br>
+      • Tìm <strong>"Phím tắt"</strong> (Shortcuts) → chọn widget cỡ <strong>nhỏ</strong> (1×1)<br>
+      • Bấm <strong>"Thêm Widget"</strong> → bấm <strong>"Xong"</strong>
+    </div>
+    <div class="guide-step" style="background:#FFF9E6;border-color:#F5C97A;">
+      <strong>Bước 10.</strong> Bấm giữ widget vừa thêm → <strong>"Chỉnh sửa Widget"</strong> → chọn Shortcut "🍽️ Ăn" vừa tạo → bấm chỗ khác để xong
+    </div>
+    <div class="guide-step" style="background:#E4F3F2;border-color:#3D7D78;color:#3D7D78;">
+      ✅ <strong>XONG!</strong> Giờ trên màn hình chính có widget "🍽️ Ăn".<br>
+      • Bấm widget → iPhone hỏi tiền → nhập số (VD: 75000) → OK<br>
+      • Tự mở web → lưu 75.000₫ vào Thức ăn → toast "✓ Đã lưu" → đóng tab
+    </div>
+    <p style="font-size:12px;color:#787068;margin-top:12px;line-height:1.5;">
+      <strong>Mẹo:</strong> Lặp lại cho mỗi danh mục hay dùng (Ăn / Xăng / Cafe / Mua sắm...). Có thể đặt 4 widget cùng 1 ô lớn (cỡ 2×2) bằng tính năng <em>Smart Stack</em> của iOS.
+    </p>
+  </div>
+
+  <!-- ========== CÁCH A: Bookmark đơn giản ========== -->
+  <div class="section">
+    <h3>📌 Cách A — Bookmark cố định (1 tap)</h3>
+    <p style="font-size:12px;color:#787068;margin-bottom:10px;line-height:1.5;">
+      Số tiền cố định luôn — phù hợp combo lặp đi lặp lại y hệt (VD: Cafe 30k mỗi sáng, Netflix 851k mỗi tháng).
+    </p>
+
+    <label>URL đầy đủ (có số tiền)</label>
     <div class="url-output" id="urlOutput">Chọn danh mục và số tiền để tạo URL...</div>
-
     <div class="btn-row">
       <button class="btn" onclick="copyURL()">📋 Sao chép URL</button>
       <button class="btn btn-secondary" onclick="openURL()">🧪 Thử ngay</button>
     </div>
-  </div>
 
-  <!-- Hướng dẫn -->
-  <div class="section">
-    <h3>3. Cách add vào màn hình chính</h3>
-    <div class="guide-tab">
-      <button class="active" onclick="setGuide('ios')">📱 iPhone</button>
-      <button onclick="setGuide('android')">🤖 Android</button>
-    </div>
-
-    <div class="guide-body active" id="guide-ios">
-      <p style="font-size:13px;margin-bottom:10px;"><strong>Cách 1 — Bookmark đơn giản (1 tap):</strong></p>
-      <div class="guide-step">1. Sao chép URL ở trên</div>
-      <div class="guide-step">2. Mở <strong>Safari</strong> → dán URL → mở</div>
-      <div class="guide-step">3. Bấm nút chia sẻ <strong>⬆️</strong> → <strong>"Thêm vào Màn hình chính"</strong></div>
-      <div class="guide-step">4. Đặt tên ngắn gọn (VD: "Ăn 50k") → <strong>Thêm</strong></div>
-      <div class="guide-step">✅ Từ giờ bấm icon trên màn hình = lưu giao dịch ngay</div>
-
-      <p style="font-size:13px;margin:14px 0 10px;"><strong>Cách 2 — Widget thật (cần Shortcuts.app):</strong></p>
-      <div class="guide-step">1. Mở app <strong>"Phím tắt"</strong> (Shortcuts) của Apple</div>
-      <div class="guide-step">2. Tab "Phím tắt của tôi" → <strong>+</strong> → <strong>Thêm hành động</strong></div>
-      <div class="guide-step">3. Tìm <strong>"Mở URL"</strong> → dán URL ở trên</div>
-      <div class="guide-step">4. Bấm tên Shortcut → đặt tên (VD: "Ăn 50k") → chọn icon ☕🍽️</div>
-      <div class="guide-step">5. Ra màn hình chính → giữ → <strong>+</strong> → tìm <strong>"Phím tắt"</strong> → chọn widget → Add Widget</div>
-      <div class="guide-step">6. Bấm vào widget để chọn Shortcut vừa tạo</div>
-      <div class="guide-step">✅ Giờ có widget thật trên homescreen</div>
-    </div>
-
-    <div class="guide-body" id="guide-android">
-      <p style="font-size:13px;margin-bottom:10px;"><strong>Cách 1 — Long-press icon app (đề xuất):</strong></p>
-      <div class="guide-step">Sau khi cài MoneyBot làm PWA → <strong>giữ icon MoneyBot</strong> → hiện menu với các lối tắt sẵn (Ăn 50k, Cafe 30k...).</div>
-
-      <p style="font-size:13px;margin:14px 0 10px;"><strong>Cách 2 — Bookmark từng URL:</strong></p>
-      <div class="guide-step">1. Sao chép URL ở trên</div>
-      <div class="guide-step">2. Mở <strong>Chrome</strong> → dán URL → mở</div>
-      <div class="guide-step">3. Menu 3 chấm <strong>⋮</strong> → <strong>"Thêm vào màn hình chính"</strong></div>
-      <div class="guide-step">4. Đặt tên ngắn gọn → <strong>Thêm</strong></div>
-      <div class="guide-step">✅ Bấm icon trên màn hình = lưu ngay</div>
+    <p style="font-size:13px;margin:14px 0 8px;color:#3D7D78;font-weight:700;">Cách add bookmark iOS:</p>
+    <div class="guide-step">1. Sao chép URL ở trên</div>
+    <div class="guide-step">2. Mở <strong>Safari</strong> → dán URL vào thanh địa chỉ → mở</div>
+    <div class="guide-step">3. Bấm nút chia sẻ <strong>⬆️</strong> ở dưới → <strong>"Thêm vào Màn hình chính"</strong></div>
+    <div class="guide-step">4. Đặt tên ngắn (VD: <strong>"☕ Cafe 30k"</strong>) → <strong>Thêm</strong></div>
+    <div class="guide-step" style="background:#E4F3F2;border-color:#3D7D78;color:#3D7D78;">
+      ✅ Bấm icon trên homescreen = lưu ngay không hỏi gì
     </div>
   </div>
 
@@ -234,63 +273,92 @@ document.getElementById('amtInput').addEventListener('input', update);
 document.getElementById('noteInput').addEventListener('input', update);
 document.getElementById('walletSelect').addEventListener('change', update);
 
-function buildURL(){
+function buildURLBase(includeAmount){
+  // includeAmount=true: URL đầy đủ có a=
+  // false: URL base có c=, w=, note=, kết thúc bằng &a= (cho Shortcuts)
   const w = document.getElementById('walletSelect').value;
   const amt = parseInt((document.getElementById('amtInput').value||'').replace(/\D/g,''),10);
   const note = document.getElementById('noteInput').value.trim();
-  if (!selCat || !amt) return null;
+  if (!selCat) return null;
   const base = location.origin + '/zap.html';
   const params = new URLSearchParams();
   if (w && w !== 'active') params.set('w', w);
   params.set('c', selCat);
-  params.set('a', amt);
   if (note) params.set('note', note);
-  return base + '?' + params.toString();
+  if (includeAmount) {
+    if (!amt) return null;
+    params.set('a', amt);
+    return base + '?' + params.toString();
+  } else {
+    // Base cho Shortcuts: kết thúc bằng "&a="
+    return base + '?' + params.toString() + '&a=';
+  }
 }
+function buildURL(){ return buildURLBase(true); }
 
 function update(){
-  const url = buildURL();
+  const fullURL = buildURL();
+  const baseURL = buildURLBase(false);
   const out = document.getElementById('urlOutput');
+  const baseOut = document.getElementById('baseURLOutput');
   const card = document.getElementById('previewCard');
-  if (!url) {
+
+  // Base URL (cho Cách C)
+  if (baseURL) {
+    baseOut.textContent = baseURL;
+  } else {
+    baseOut.textContent = 'Chọn danh mục trước...';
+  }
+
+  // Full URL (cho Cách A)
+  if (fullURL) {
+    out.textContent = fullURL;
+    const amt = parseInt(document.getElementById('amtInput').value.replace(/\D/g,''),10);
+    const note = document.getElementById('noteInput').value.trim();
+    const fmt = n => '₫'+n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+    card.innerHTML = `
+      <div class="preview-icon">${selCatIcon}</div>
+      <div class="preview-title">${selCat}</div>
+      <div class="preview-amt">−${fmt(amt)}</div>
+      <div class="preview-detail">${note?note+' · ':''}lưu vào ví đang dùng</div>
+    `;
+  } else if (selCat) {
+    out.textContent = 'Nhập số tiền để tạo URL Cách A...';
+    card.innerHTML = `
+      <div class="preview-icon">${selCatIcon}</div>
+      <div class="preview-title">${selCat}</div>
+      <div class="preview-detail" style="margin-top:8px;">Số tiền sẽ nhập khi bấm widget</div>
+    `;
+  } else {
     out.textContent = 'Chọn danh mục và số tiền để tạo URL...';
     card.innerHTML = '<div class="preview-icon">❓</div><div class="preview-title">Chưa đủ thông tin</div>';
-    return;
   }
-  out.textContent = url;
-  const amt = parseInt(document.getElementById('amtInput').value.replace(/\D/g,''),10);
-  const note = document.getElementById('noteInput').value.trim();
-  const fmt = n => '₫'+n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
-  card.innerHTML = `
-    <div class="preview-icon">${selCatIcon}</div>
-    <div class="preview-title">${selCat}</div>
-    <div class="preview-amt">−${fmt(amt)}</div>
-    <div class="preview-detail">${note?note+' · ':''}lưu vào ví đang dùng</div>
-  `;
 }
 
+function copyToClipboard(text, msg){
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => alert(msg));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    alert(msg);
+  }
+}
 function copyURL(){
   const url = buildURL();
   if (!url) { alert('Vui lòng chọn danh mục và nhập số tiền!'); return; }
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(url).then(() => alert('✓ Đã sao chép URL — paste vào trình duyệt để add màn hình chính'));
-  } else {
-    const ta = document.createElement('textarea');
-    ta.value = url; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
-    alert('✓ Đã sao chép URL');
-  }
+  copyToClipboard(url, '✓ Đã sao chép URL — paste vào Safari để add màn hình chính');
+}
+function copyBaseURL(){
+  const url = buildURLBase(false);
+  if (!url) { alert('Vui lòng chọn danh mục!'); return; }
+  copyToClipboard(url, '✓ Đã sao chép URL base — paste vào ô URL trong Shortcuts (Cách C)');
 }
 function openURL(){
   const url = buildURL();
   if (!url) { alert('Vui lòng chọn danh mục và nhập số tiền!'); return; }
   window.open(url, '_blank');
-}
-function setGuide(p){
-  document.querySelectorAll('.guide-tab button').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.guide-body').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('guide-'+p).classList.add('active');
 }
 
 // Init

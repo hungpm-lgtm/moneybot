@@ -535,13 +535,64 @@ function initFirebase(){
   } catch(e) { _syncStatus = 'error'; updateSyncBadge(); }
 }
 
+/* ── Pre-select từ URL params (Cách B) ── */
+// Hỗ trợ: ?w=<walletId|name> &c=<categoryName> &a=<amount> &focus=amt
+function applyURLParams(){
+  const p = new URLSearchParams(location.search);
+  const wParam = p.get('w');
+  const cParam = p.get('c');
+  const aParam = p.get('a');
+  const noteParam = p.get('note');
+
+  // Resolve wallet (id hoặc tên không phân biệt hoa thường + dấu)
+  if (wParam) {
+    const byId = db.wallets.find(x => x.id === wParam);
+    if (byId) selWalletId = byId.id;
+    else {
+      const norm = s => (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+      const target = norm(decodeURIComponent(wParam));
+      const byName = db.wallets.find(x => norm(x.name) === target);
+      if (byName) selWalletId = byName.id;
+    }
+  }
+
+  if (cParam) {
+    const cat = decodeURIComponent(cParam);
+    const found = (db.categories.expense || []).find(c => c.name === cat);
+    if (found) { selCat = found.name; selCatIcon = found.icon; }
+  }
+
+  if (aParam) {
+    const n = parseInt(String(aParam).replace(/\D/g,''), 10);
+    if (n > 0) document.getElementById('amtInput').value = n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  }
+
+  if (noteParam) document.getElementById('noteInput').value = decodeURIComponent(noteParam);
+
+  // Re-render với lựa chọn mới
+  renderWallets(); renderCats(); checkAutoSave();
+
+  // Nếu có ?focus=amt → focus vào ô số tiền cho user gõ tiếp luôn
+  if (p.get('focus') === 'amt' || (cParam && !aParam)) {
+    setTimeout(() => {
+      const el = document.getElementById('amtInput');
+      el.focus();
+      if (el.value === '000') { try { el.setSelectionRange(0, 0); } catch(e){} }
+    }, 200);
+  }
+}
+
 /* ── Khởi động ── */
 loadDB();
 renderWallets();
 renderCats();
 updateSyncBadge();
+applyURLParams();
 checkAutoSave();
 initFirebase();
+// Sau khi cloud sync xong cũng re-apply (nếu user mới load lần đầu)
+const _origPullCloud = pullCloud;
+pullCloud = async function(...args){ await _origPullCloud.apply(this, args); applyURLParams(); };
 </script>
 </body>
 </html>

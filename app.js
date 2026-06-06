@@ -119,6 +119,14 @@ function fmtShort(n){
   if (a >= 1e3) return (n/1e3).toFixed(0) + 'k';
   return ''+Math.round(n);
 }
+// Phiên bản chi tiết hơn — luôn giữ 2 chữ số sau dấu phẩy (dùng cho wallet chip trang chủ)
+function fmtShortPrecise(n){
+  const a = Math.abs(n);
+  if (a >= 1e9) return (n/1e9).toFixed(2).replace('.',',') + 'tỷ';
+  if (a >= 1e6) return (n/1e6).toFixed(2).replace('.',',') + 'tr';
+  if (a >= 1e3) return (n/1e3).toFixed(1).replace('.',',') + 'k';
+  return ''+Math.round(n);
+}
 function catMeta(name, type){
   const list = type === 'income'
     ? (db.categories ? db.categories.income : INCOME_CATS)
@@ -313,16 +321,14 @@ function renderTotalAssets(){
     const balColor = isNeg ? 'rgba(255,160,160,1)' : '#fff';
     const typeLabel = WALLET_TYPES[w.type] || '';
     html += '<div class="wcc-chip" onclick="openWalletModal(\'' + w.id + '\')">'
-      + '<div class="wcc-icon">' + (w.icon||'💼') + '</div>'
       + '<div class="wcc-info">'
       + '<div class="wcc-name">' + esc(w.name) + '</div>'
       + (typeLabel ? '<div class="wcc-type">' + typeLabel + '</div>' : '')
-      + '<div class="wcc-bal" style="color:' + balColor + '">' + fmtShort(bal) + ' ₫</div>'
+      + '<div class="wcc-bal" style="color:' + balColor + '">' + fmtShortPrecise(bal) + ' ₫</div>'
       + '</div></div>';
   });
   html += '<div class="wcc-chip add-chip" onclick="openWalletModal(null)">'
-    + '<div class="wcc-icon">＋</div>'
-    + '<div class="wcc-info"><div class="wcc-name" style="color:rgba(255,255,255,0.7)">Thêm ví</div></div>'
+    + '<div class="wcc-info"><div class="wcc-name" style="color:rgba(255,255,255,0.7)">＋ Thêm ví</div></div>'
     + '</div>';
   html += '</div>';
   // Cảnh báo số dư âm (2.5)

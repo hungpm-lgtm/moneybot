@@ -66,10 +66,15 @@ function loadDB(){
   db.challenges = db.challenges || [];
   db.profile = db.profile || {name:'Người dùng', code:''};
   db.settings = db.settings || {};
+  // Đa tệ — mặc định
+  if (!db.settings.mainCurrency) db.settings.mainCurrency = 'VND';
+  if (!db.settings.exchangeRates) db.settings.exchangeRates = { CNY: 3500 };
   // Danh mục tuỳ chỉnh — migrate từ hằng số nếu chưa có
   if (!db.categories) {
     db.categories = { expense: [...EXPENSE_CATS], income: [...INCOME_CATS] };
   }
+  // Migration: ví cũ có currency USD → đổi sang VND
+  db.wallets.forEach(w => { if (w.currency === 'USD') w.currency = 'VND'; });
   // Tự tạo mã ví nếu chưa có
   if (!db.profile.code) db.profile.code = genUserCode(db.profile.name);
   if (db.wallets.length === 0) {
@@ -104,11 +109,36 @@ function pd(s){ const a = s.split('-').map(Number); return new Date(a[0], a[1]-1
 function todayStr(){ const d = new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function activeWallet(){ return db.wallets.find(w => w.id === db.settings.activeWalletId) || db.wallets[0]; }
-function curSym(cur){ return cur === 'USD' ? '$' : '₫'; }
+/* ----- Đa tệ ----- */
+const CURRENCIES = ['VND', 'CNY']; // tiền tệ hỗ trợ
+const CURRENCY_LABELS = { VND: 'VND (₫)', CNY: 'CNY (¥) - Nhân dân tệ' };
+function curSym(cur){
+  if (cur === 'CNY') return '¥';
+  return '₫';
+}
+function mainCurrency(){ return (db.settings && db.settings.mainCurrency) || 'VND'; }
+// Tỷ giá 1 đơn vị ngoại tệ = bao nhiêu VND. Mặc định CNY = 3500 VND.
+function getExchangeRate(cur){
+  if (cur === 'VND') return 1;
+  const r = (db.settings && db.settings.exchangeRates) || {};
+  if (cur === 'CNY') return Number(r.CNY) || 3500;
+  return 1;
+}
+// Quy đổi số tiền từ currency nguồn về tiền tệ chính
+function convertToMain(amount, fromCur){
+  if (!amount) return 0;
+  const target = mainCurrency();
+  if (fromCur === target) return amount;
+  // Quy về VND làm trung gian
+  const inVND = amount * getExchangeRate(fromCur);
+  if (target === 'VND') return inVND;
+  return inVND / getExchangeRate(target);
+}
 // Định dạng số VND: dùng dấu "." ngăn cách hàng nghìn (1.500.000)
 function fmtVND(n){ return Math.round(Math.abs(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
 function fmt(n, cur){
-  cur = cur || (activeWallet() ? activeWallet().currency : 'VND');
+  // Mặc định dùng tiền tệ chính (không phụ thuộc ví đang chọn)
+  cur = cur || mainCurrency();
   return curSym(cur) + fmtVND(n);
 }
 function fmtSigned(n, cur){ return (n < 0 ? '-' : '') + fmt(n, cur); }
@@ -222,8 +252,9 @@ function walletBalance(wid){
   });
   return bal;
 }
+// Tổng tài sản TÍNH THEO TIỀN TỆ CHÍNH (quy đổi đa tệ về 1 đơn vị)
 function totalBalance(){
-  return db.wallets.reduce((s, w) => s + walletBalance(w.id), 0);
+  return db.wallets.reduce((s, w) => s + convertToMain(walletBalance(w.id), w.currency || 'VND'), 0);
 }
 function monthExpenseAllWallets(year, month){
   const start = new Date(year, month, 1), end = new Date(year, month+1, 1);
@@ -300,6 +331,7 @@ function renderAll(){
   renderProfileUI();
   renderCatScreen();
   renderReport();
+  updateCurrencySubLabel();
   if (typeof renderSyncUI === 'function') renderSyncUI();
 }
 
@@ -320,11 +352,13 @@ function renderTotalAssets(){
     if (isNeg) negativeWallets.push(w.name);
     const balColor = isNeg ? 'rgba(255,160,160,1)' : '#fff';
     const typeLabel = WALLET_TYPES[w.type] || '';
+    const walCur = w.currency || 'VND';
+    const sym = curSym(walCur);
     html += '<div class="wcc-chip" onclick="openWalletModal(\'' + w.id + '\')">'
       + '<div class="wcc-info">'
       + '<div class="wcc-name">' + esc(w.name) + '</div>'
       + (typeLabel ? '<div class="wcc-type">' + typeLabel + '</div>' : '')
-      + '<div class="wcc-bal" style="color:' + balColor + '">' + fmtShortPrecise(bal) + ' ₫</div>'
+      + '<div class="wcc-bal" style="color:' + balColor + '">' + fmtShortPrecise(bal) + ' ' + sym + '</div>'
       + '</div></div>';
   });
   html += '<div class="wcc-chip add-chip" onclick="openWalletModal(null)">'
@@ -396,16 +430,37 @@ function renderChart(){
     circles += '<circle cx="80" cy="80" r="60" fill="none" stroke="' + a.meta.color + '" stroke-width="28" stroke-dasharray="' + dash.toFixed(1) + ' ' + (C-dash).toFixed(1) + '" stroke-dashoffset="' + (-offset).toFixed(1) + '" transform="rotate(-90 80 80)"/>';
     offset += dash;
   });
+  // Tính ngân sách tháng hiện tại (chỉ áp dụng cho tab chi phí, kỳ Tháng/Tuần/Ngày trong tháng hiện tại)
+  const showBudget = (homeTab === 'expense');
+  const monthBudgets = {}; // categoryName -> limit
+  if (showBudget) {
+    db.budgets.forEach(b => {
+      // Gộp ngân sách cùng danh mục từ các ví (nếu user đặt nhiều)
+      monthBudgets[b.category] = (monthBudgets[b.category] || 0) + (b.limit || 0);
+    });
+  }
+
   let list = '';
   arr.forEach(a => {
     const pct = Math.round(a.amount / total * 100);
-    // 4.9: click vào hàng danh mục → mở Giao dịch lọc theo
     const enc = btoa(unescape(encodeURIComponent(a.name)));
+    // Hiển thị "X/Y" nếu có ngân sách cho danh mục này
+    const limit = monthBudgets[a.name] || 0;
+    let amountHtml;
+    if (limit > 0) {
+      const over = a.amount > limit;
+      amountHtml = '<div class="cat-amount" style="text-align:right;line-height:1.2;">'
+        + '<div style="' + (over ? 'color:var(--pink);' : '') + '">' + fmt(a.amount) + '</div>'
+        + '<div style="font-size:10px;font-weight:600;color:var(--gray-400);margin-top:1px;">/ ' + fmt(limit) + '</div>'
+        + '</div>';
+    } else {
+      amountHtml = '<div class="cat-amount">' + fmt(a.amount) + '</div>';
+    }
     list += '<div class="category-item" style="cursor:pointer;" onclick="filterByCategoryEnc(\'' + enc + '\')">'
       + '<div class="cat-icon" style="background:' + a.meta.color + '22">' + a.meta.icon + '</div>'
       + '<div class="cat-info"><div class="cat-name">' + esc(a.name) + '</div>'
       + '<div class="cat-bar-wrap"><div class="cat-bar-bg"><div class="cat-bar" style="width:' + pct + '%;background:' + a.meta.color + '"></div></div><div class="cat-pct">' + pct + '%</div></div></div>'
-      + '<div class="cat-amount">' + fmt(a.amount) + '</div></div>';
+      + amountHtml + '</div>';
   });
   el.innerHTML = '<div class="donut-wrapper"><svg class="donut-svg" viewBox="0 0 160 160">'
     + '<circle cx="80" cy="80" r="60" fill="none" stroke="#E5E7EB" stroke-width="28"/>' + circles
@@ -751,6 +806,37 @@ function addAmount(delta){
 /* ============================================================
    VÍ (CRUD)
    ============================================================ */
+/* ============================================================
+   CURRENCY MODAL (tiền tệ chính + tỷ giá)
+   ============================================================ */
+function openCurrencyModal(){
+  const cur = mainCurrency();
+  document.getElementById('mainCurrencySelect').value = cur;
+  const rate = getExchangeRate('CNY');
+  document.getElementById('rateCNYInput').value = rate.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  openModal('modal-currency');
+}
+function submitCurrencySettings(){
+  const newMain = document.getElementById('mainCurrencySelect').value;
+  const rawRate = (document.getElementById('rateCNYInput').value || '').replace(/\./g,'').replace(/\D/g,'');
+  const rate = parseInt(rawRate, 10) || 3500;
+  db.settings.mainCurrency = newMain;
+  db.settings.exchangeRates = db.settings.exchangeRates || {};
+  db.settings.exchangeRates.CNY = rate;
+  saveDB();
+  closeModal('modal-currency');
+  renderAll();
+  showToast('💱 Đã lưu tiền tệ chính: ' + newMain);
+}
+// Cập nhật sub label trong Settings
+function updateCurrencySubLabel(){
+  const el = document.getElementById('currencySubLabel');
+  if (!el) return;
+  const rate = getExchangeRate('CNY');
+  const rateStr = rate.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  el.textContent = mainCurrency() + ' · 1 ¥ = ' + rateStr + ' ₫';
+}
+
 function openWalletSettings(){
   if (db.wallets.length === 1) { openWalletModal(db.wallets[0].id); return; }
   openWalletModal(db.wallets[0].id);

@@ -174,7 +174,7 @@
         <div class="profile-name" id="profileName">Người dùng</div>
         <div class="profile-code" id="profileCode">Mã ví: ---</div>
       </div>
-      <div class="theme-toggle-btn" onclick="event.stopPropagation(); showToast('Tính năng đổi giao diện sẽ sớm có!')">☀️</div>
+      <div class="theme-toggle-btn" onclick="event.stopPropagation(); openThemeModal()">🎨</div>
     </div>
 
     <!-- Sync section -->
@@ -401,6 +401,17 @@
         </div>
 
         <button class="danger-btn" id="txDeleteBtn" style="display:none" onclick="deleteTransaction()">🗑 Xoá giao dịch</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Theme Modal -->
+  <div class="modal-overlay" id="modal-theme" onclick="closeModal('modal-theme')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-title">🎨 Giao diện</div>
+      <div class="add-tx-form">
+        <div id="themeList"></div>
       </div>
     </div>
   </div>

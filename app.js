@@ -69,6 +69,7 @@ function loadDB(){
   // Đa tệ — mặc định
   if (!db.settings.mainCurrency) db.settings.mainCurrency = 'VND';
   if (!db.settings.exchangeRates) db.settings.exchangeRates = { CNY: 3500 };
+  if (!db.settings.theme) db.settings.theme = 'default';
   // Danh mục tuỳ chỉnh — migrate từ hằng số nếu chưa có
   if (!db.categories) {
     db.categories = { expense: [...EXPENSE_CATS], income: [...INCOME_CATS] };
@@ -807,6 +808,61 @@ function addAmount(delta){
    VÍ (CRUD)
    ============================================================ */
 /* ============================================================
+   THEME MODAL (chọn giao diện màu)
+   ============================================================ */
+const THEMES = [
+  {
+    id: 'default',
+    name: 'Cream Sage',
+    desc: 'Kem ấm + xanh sage cổ điển',
+    swatches: ['#EDE7DC','#78B2AD','#50908B','#E4969E'],
+    bodyClass: ''
+  },
+  {
+    id: 'pastel',
+    name: 'Pastel Pop',
+    desc: 'Nectarine · Pêche · Menthe · Lagune',
+    swatches: ['#D7897F','#F9B95C','#96C7B3','#6398A9'],
+    bodyClass: 'theme-pastel'
+  }
+];
+function applyTheme(id){
+  const t = THEMES.find(x => x.id === id) || THEMES[0];
+  // Xóa class theme cũ
+  THEMES.forEach(x => { if (x.bodyClass) document.body.classList.remove(x.bodyClass); });
+  if (t.bodyClass) document.body.classList.add(t.bodyClass);
+  // Cập nhật meta theme-color
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', t.swatches[0]);
+}
+function openThemeModal(){
+  const list = document.getElementById('themeList');
+  const current = (db.settings && db.settings.theme) || 'default';
+  list.innerHTML = THEMES.map(t => {
+    const sw = t.swatches.map(c => `<div class="theme-swatch" style="background:${c}"></div>`).join('');
+    return `<div class="theme-card${t.id===current?' selected':''}" onclick="pickTheme('${t.id}')">
+      <div class="theme-swatches">${sw}</div>
+      <div class="theme-info">
+        <div class="theme-name">${t.name}</div>
+        <div class="theme-desc">${t.desc}</div>
+      </div>
+      <div class="theme-check">✓</div>
+    </div>`;
+  }).join('');
+  openModal('modal-theme');
+}
+function pickTheme(id){
+  db.settings.theme = id;
+  applyTheme(id);
+  saveDB();
+  // Update modal selection
+  document.querySelectorAll('.theme-card').forEach(el => el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  showToast('🎨 Đã đổi giao diện');
+  setTimeout(() => closeModal('modal-theme'), 400);
+}
+
+/* ============================================================
    CURRENCY MODAL (tiền tệ chính + tỷ giá)
    ============================================================ */
 function openCurrencyModal(){
@@ -1511,6 +1567,7 @@ async function onSignedIn(user) {
     _syncStatus = 'synced';
     db.settings._lastSync = new Date().toISOString();
     localStorage.setItem(STORE_KEY, JSON.stringify(db));
+    if (db.settings.theme) applyTheme(db.settings.theme); // Apply lại theme từ cloud
     showToast('☁️ Đã đồng bộ dữ liệu từ cloud');
   } catch(e) {
     _syncStatus = 'error';
@@ -1992,6 +2049,7 @@ function checkBackupReminder(){
 
 /* ---------- Khởi động ---------- */
 loadDB();
+applyTheme(db.settings.theme); // Apply theme ngay khi load để không nhấp nháy
 document.getElementById('txDate').value = todayStr();
 initFirebase(); // Khởi tạo Firebase (nếu đã cấu hình)
 switchScreen('home');

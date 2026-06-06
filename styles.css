@@ -1,4 +1,5 @@
 :root {
+  /* Theme mặc định: Cream Sage */
   --teal: #78B2AD;
   --teal-light: #E4F3F2;
   --teal-dark: #50908B;
@@ -25,6 +26,46 @@
   --radius-lg: 28px;
   --font: 'Be Vietnam Pro', sans-serif;
 }
+
+/* === THEME: Pastel Pop (Nectarine/Pêche/Menthe/Lagune) === */
+body.theme-pastel {
+  --teal: #96C7B3;       /* Menthe */
+  --teal-light: #E0F0E8;
+  --teal-dark: #6398A9;  /* Lagune */
+  --pink: #D7897F;       /* Nectarine */
+  --orange: #F9B95C;     /* Pêche */
+  --purple: #B89DD9;
+  --gold: #F9B95C;       /* Pêche cũng là gold */
+  --blue: #6398A9;       /* Lagune */
+  --bg: #FCEDD8;         /* peach cream */
+  --gray-50: #FFF8EE;
+  --gray-100: #FBEEDC;
+  --gray-200: #F0DCC0;
+  --gray-300: #D4B89A;
+  --gray-400: #9F8770;
+  --gray-500: #6E5D4D;
+  --gray-700: #3F352B;
+  --shadow-sm: 0 2px 16px rgba(160,100,70,0.10);
+  --shadow-md: 0 6px 28px rgba(160,100,70,0.14);
+}
+
+/* Theme picker UI */
+.theme-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--white); border-radius: var(--radius-sm);
+  padding: 12px 14px; margin-bottom: 10px; cursor: pointer;
+  border: 2px solid var(--gray-200); transition: border-color 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+.theme-card:active { transform: scale(0.98); }
+.theme-card.selected { border-color: var(--teal-dark); }
+.theme-swatches { display: flex; gap: 4px; flex-shrink: 0; }
+.theme-swatch { width: 22px; height: 38px; border-radius: 4px; }
+.theme-info { flex: 1; }
+.theme-name { font-size: 14px; font-weight: 800; color: var(--gray-900); }
+.theme-desc { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+.theme-check { font-size: 18px; color: var(--teal-dark); opacity: 0; }
+.theme-card.selected .theme-check { opacity: 1; }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
